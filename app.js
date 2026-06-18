@@ -20,11 +20,14 @@ const loginForm = document.querySelector("#loginForm");
 const registerForm = document.querySelector("#registerForm");
 const forgotPasswordForm = document.querySelector("#forgotPasswordForm");
 const resetPasswordForm = document.querySelector("#resetPasswordForm");
+const isLocalAppHost = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+const savedApiBase = isLocalAppHost ? localStorage.getItem("forgeApiBaseUrl") : null;
 const ANALYSIS_API_BASE = window.FORGE_API_BASE_URL
-  || localStorage.getItem("forgeApiBaseUrl")
-  || (window.location.port === "8001"
-    ? `${window.location.origin}/api/v1`
-    : `${window.location.protocol}//${window.location.hostname}:8001/api/v1`);
+  || savedApiBase
+  || (isLocalAppHost && window.location.port !== "8001"
+    ? `${window.location.protocol}//${window.location.hostname}:8001/api/v1`
+    : `${window.location.origin}/api/v1`);
+if (!isLocalAppHost) localStorage.removeItem("forgeApiBaseUrl");
 let currentUser = null;
 const isCreatorPreview = ["localhost", "127.0.0.1"].includes(window.location.hostname)
   && window.location.hash === "#creator-preview";
@@ -345,11 +348,16 @@ function validationMessage(detail) {
 }
 
 async function authRequest(path, options = {}) {
-  const response = await fetch(`${ANALYSIS_API_BASE}/auth/${path}`, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-    ...options
-  });
+  let response;
+  try {
+    response = await fetch(`${ANALYSIS_API_BASE}/auth/${path}`, {
+      credentials: "include",
+      headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+      ...options
+    });
+  } catch {
+    throw new Error("サーバーへ接続できませんでした。ページを再読み込みして、もう一度お試しください。");
+  }
   if (!response.ok) {
     let message = "通信に失敗しました。";
     try {
