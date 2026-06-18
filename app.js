@@ -259,12 +259,47 @@ function validateRegistrationStepOne() {
   for (const name of fields) {
     const input = registerForm.elements[name];
     if (!input.value.trim() || !input.checkValidity()) {
+      showRegistrationStep(1);
       input.reportValidity();
       return false;
     }
   }
   if (registerForm.elements.password.value !== registerForm.elements.password_confirm.value) {
     document.querySelector("#registerError").textContent = "確認用パスワードが一致しません。";
+    return false;
+  }
+  return true;
+}
+
+function showRegistrationError(message, fieldName = null, step = 4) {
+  showRegistrationStep(step);
+  const error = document.querySelector("#registerError");
+  error.textContent = message;
+  if (fieldName) {
+    const field = registerForm.elements[fieldName];
+    field?.focus();
+    field?.reportValidity();
+  }
+  error.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function validateRegistrationDetails() {
+  if (!validateRegistrationStepOne()) return false;
+  const requiredFields = [
+    ["username", "ユーザーネームを入力してください。"],
+    ["birth_date", "生年月日を入力してください。"],
+    ["weight_kg", "現在の体重を入力してください。"]
+  ];
+  for (const [name, message] of requiredFields) {
+    const field = registerForm.elements[name];
+    if (!field.value || !field.checkValidity()) {
+      showRegistrationError(message, name);
+      return false;
+    }
+  }
+  const targetWeight = registerForm.elements.target_weight_kg;
+  if (targetWeight.value && !targetWeight.checkValidity()) {
+    showRegistrationError("目標体重を正しい範囲で入力してください。", "target_weight_kg");
     return false;
   }
   return true;
@@ -1574,14 +1609,15 @@ resetPasswordForm.addEventListener("submit", async (event) => {
   }
 });
 
-registerForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const submit = registerForm.querySelector(".auth-submit");
+async function completeRegistration() {
+  const submit = document.querySelector("#completeRegistration");
   const error = document.querySelector("#registerError");
+  if (submit.disabled) return;
+  if (!validateRegistrationDetails()) return;
   const data = new FormData(registerForm);
   error.textContent = "";
   if (data.get("password") !== data.get("password_confirm")) {
-    error.textContent = "確認用パスワードが一致しません。";
+    showRegistrationError("確認用パスワードが一致しません。", "password_confirm", 1);
     return;
   }
   const big3 = {};
@@ -1589,7 +1625,7 @@ registerForm.addEventListener("submit", async (event) => {
     const noRecord = registerForm.querySelector(`[data-big3-none="${field}"]`).checked;
     const value = Number(data.get(field));
     if (!noRecord && !(value > 0)) {
-      error.textContent = "BIG3は重量を入力するか「記録なし」を選択してください。";
+      showRegistrationError("BIG3は重量を入力するか「記録なし」を選択してください。", field);
       return;
     }
     big3[field] = noRecord ? null : value;
@@ -1613,18 +1649,25 @@ registerForm.addEventListener("submit", async (event) => {
         ...big3
       })
     });
-    applyAuthenticatedUser(user);
-    window.setTimeout(() => {
-      registerForm.reset();
-      showRegistrationStep(1);
-    }, 0);
-    showToast("会員登録が完了しました。");
+    currentUser = user;
+    submit.textContent = "ホームを開いています...";
+    window.location.replace(`${window.location.origin}/#home`);
+    return;
   } catch (requestError) {
-    error.textContent = requestError.message;
+    showRegistrationError(requestError.message);
   } finally {
-    submit.disabled = false;
-    submit.textContent = "設定を保存してホームへ";
+    if (document.body.contains(submit)) {
+      submit.disabled = false;
+      submit.textContent = "設定を保存してホームへ";
+    }
   }
+}
+
+document.querySelector("#completeRegistration").addEventListener("click", completeRegistration);
+
+registerForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  completeRegistration();
 });
 
 if (new URLSearchParams(window.location.search).get("reset_token")) {

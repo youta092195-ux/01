@@ -43,7 +43,7 @@
           <a class="creator-entry-link" href="creator.html">製作者向けページを開く →</a>
         </form>
 
-        <form class="auth-form" id="registerForm">
+        <form class="auth-form" id="registerForm" novalidate>
           <div class="registration-progress"><i class="active"></i><i></i><i></i><i></i></div>
           <section class="registration-step active" data-registration-step="1">
             <div class="auth-heading"><p class="eyebrow">STEP 1 / 4</p><h2>ID・パスワード設定</h2><p>ログインIDは自分で決められます。別途、変更できない会員番号も自動発行されます。</p></div>
@@ -84,7 +84,7 @@
               </div>
             </fieldset>
             <label class="auth-consent"><input name="notifications" type="checkbox" checked><span><strong>通知を許可する</strong><small>解析完了、メニュー変更、フォーム注意を通知します。</small></span></label>
-            <button class="auth-submit" type="submit">設定を保存してホームへ</button>
+            <button class="auth-submit" id="completeRegistration" type="button">設定を保存してホームへ</button>
           </section>
           <p class="auth-error" id="registerError"></p>
         </form>
@@ -969,6 +969,6 @@
   </dialog>
 
   <div class="toast" id="toast" role="status"></div>
-  <script src="app.js?v=20260618-1"></script>
+  <script src="app.js?v=20260618-2"></script>
 </body>
 </html>
