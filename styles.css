@@ -74,7 +74,7 @@ body.auth-loading .mobile-bottom-nav { visibility: hidden; }
 .password-field input { padding-right: 57px !important; }
 .password-field button { position: absolute; top: 50%; right: 7px; height: 31px; padding: 0 8px; transform: translateY(-50%); border: 0; border-radius: 5px; background: #272c24; color: var(--lime); font-size: 9px; font-weight: 700; }
 .auth-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
-.auth-field-grid label > span { position: absolute; right: 13px; bottom: 15px; color: var(--muted); font-size: 9px; }
+.auth-field-grid > label > span:not(.password-field) { position: absolute; right: 13px; bottom: 15px; color: var(--muted); font-size: 9px; }
 .registration-big3 { margin: 7px 0 16px; padding: 17px; border: 1px solid var(--line); border-radius: 9px; }
 .registration-big3 legend { padding: 0 7px; font-size: 13px; font-weight: 700; }
 .registration-big3 > p { margin: 0 0 13px; color: var(--muted); font-size: 10px; line-height: 1.6; }
