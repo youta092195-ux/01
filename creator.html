@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#11130f">
+  <title>AI×MUS Creator Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=20260615-5">
+</head>
+<body class="creator-body">
+  <main class="creator-portal">
+    <header class="creator-header">
+      <a class="brand" href="creator.html"><span class="brand-mark">A</span><span>AI×MUS</span></a>
+      <span>CREATOR PORTAL</span>
+    </header>
+    <section class="creator-hero">
+      <p class="eyebrow">DEVELOPMENT HUB</p>
+      <h1>製作者向けページ</h1>
+      <p>ユーザー画面とは分離した、開発・確認用の入口です。</p>
+    </section>
+    <section class="creator-link-grid">
+      <a class="creator-link featured" href="/#creator-preview">
+        <span>LOCAL PREVIEW</span><strong>製作者向けプレビュー</strong><p>会員登録をせず、実際のホーム画面と全機能を確認します。</p><b>開く →</b>
+      </a>
+      <a class="creator-link" href="http://localhost:8001/">
+        <span>PRODUCTION PC</span><strong>本番PC向け</strong><p>認証・DB・動画解析APIを統合した利用者サイトです。</p><b>開く →</b>
+      </a>
+      <a class="creator-link" id="mobileProductionLink" href="https://peaceful-then-grande-quarters.trycloudflare.com/">
+        <span>PRODUCTION MOBILE</span><strong>本番スマホ向け</strong><p>Wi-Fiやモバイル回線を問わず、HTTPSで開ける公開版です。</p><b id="mobileProductionUrl">公開URLを開く →</b>
+      </a>
+    </section>
+    <section class="creator-status">
+      <div><span id="apiStatusDot"></span><strong>認証・解析API</strong><small id="apiStatusText">確認中...</small></div>
+      <div><span class="ready"></span><strong>ユーザーサイト</strong><small>localhost:8001</small></div>
+      <div><span class="ready"></span><strong>開発フロント</strong><small>localhost:8000</small></div>
+    </section>
+  </main>
+  <script>
+    const apiOrigin = `${location.protocol}//${location.hostname}:8001`;
+    fetch(`${apiOrigin}/api/v1/health`)
+      .then((response) => {
+        if (!response.ok) throw new Error();
+        document.querySelector("#apiStatusDot").classList.add("ready");
+        document.querySelector("#apiStatusText").textContent = "稼働中";
+      })
+      .catch(() => {
+        document.querySelector("#apiStatusDot").classList.add("error");
+        document.querySelector("#apiStatusText").textContent = "停止中";
+      });
+    fetch(`${apiOrigin}/api/v1/public-url`)
+      .then((response) => response.json())
+      .then(({ url }) => {
+        if (!url) return;
+        document.querySelector("#mobileProductionLink").href = url;
+        document.querySelector("#mobileProductionUrl").textContent = `${url.replace(/^https?:\/\//, "")} →`;
+      })
+      .catch(() => {});
+  </script>
+</body>
+</html>

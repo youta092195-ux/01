@@ -1,0 +1,11 @@
+backend/.venv
+backend/data
+backend/**/__pycache__
+backend/**/*.pyc
+admin/node_modules
+admin/*_preview.png
+tools
+.git
+.agents
+.codex
+PUBLIC_URL.txt

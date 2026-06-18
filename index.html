@@ -1,0 +1,974 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#11130f">
+  <title>AI×MUS｜筋トレ管理×AIトレーナー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=20260615-7">
+</head>
+<body class="auth-loading">
+  <section class="auth-gate" id="authGate" aria-live="polite">
+    <div class="auth-brand-panel">
+      <a class="brand auth-brand" href="#" aria-label="AI×MUS"><span class="brand-mark">A</span><span>AI×MUS</span></a>
+      <div>
+        <p class="eyebrow">YOUR PERSONAL TRAINING SYSTEM</p>
+        <h1>記録を、次の強さへ。</h1>
+        <p>トレーニング記録、成長分析、AIフォーム評価を一つのアカウントで管理します。</p>
+      </div>
+      <div class="auth-feature-list">
+        <span><b>01</b> 種目ごとの最大重量・RM・ボリューム</span>
+        <span><b>02</b> 目標に合わせたメニュー調整</span>
+        <span><b>03</b> BIG3動画のフォーム解析</span>
+      </div>
+    </div>
+    <div class="auth-form-panel">
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button class="active" type="button" data-auth-mode="login">ログイン</button>
+          <button type="button" data-auth-mode="register">会員登録</button>
+        </div>
+
+        <form class="auth-form active" id="loginForm">
+          <div class="auth-heading"><p class="eyebrow">WELCOME BACK</p><h2>ログイン</h2><p>登録済みのIDとパスワードを入力してください。</p></div>
+          <label>ID<input name="login_id" type="text" autocomplete="username" minlength="3" maxlength="64" required></label>
+          <label>パスワード<span class="password-field"><input name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required><button type="button" data-toggle-password>表示</button></span></label>
+          <p class="auth-error" id="loginError"></p>
+          <button class="auth-submit" type="submit">ログイン</button>
+          <small class="auth-session-note">ログアウトするまで、この端末ではログイン状態が維持されます。</small>
+          <button class="forgot-password-button" type="button" id="openForgotPassword">パスワードを忘れた方</button>
+          <a class="creator-entry-link" href="creator.html">製作者向けページを開く →</a>
+        </form>
+
+        <form class="auth-form" id="registerForm">
+          <div class="registration-progress"><i class="active"></i><i></i><i></i><i></i></div>
+          <section class="registration-step active" data-registration-step="1">
+            <div class="auth-heading"><p class="eyebrow">STEP 1 / 4</p><h2>ID・パスワード設定</h2><p>ログインIDは自分で決められます。別途、変更できない会員番号も自動発行されます。</p></div>
+            <div class="auth-field-grid">
+              <label>ID<input name="login_id" type="text" autocomplete="username" minlength="3" maxlength="64" placeholder="3文字以上・空白不可" required></label>
+              <label>メールアドレス<input name="email" type="email" autocomplete="email" placeholder="パスワード再設定に使用" required></label>
+              <label>パスワード<span class="password-field"><input name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="8文字以上" required><button type="button" data-toggle-password>表示</button></span></label>
+              <label>パスワード確認<span class="password-field"><input name="password_confirm" type="password" autocomplete="new-password" minlength="8" maxlength="128" required><button type="button" data-toggle-password>表示</button></span></label>
+            </div>
+            <div class="registration-security-note"><strong>IDを忘れた場合</strong><p>メールアドレスで本人確認できる設計にします。自動発行される会員番号はユーザー管理用で、通常のログインには使いません。</p></div>
+            <button class="auth-submit registration-next" type="button" data-next-registration="2">次へ</button>
+          </section>
+          <section class="registration-step" data-registration-step="2">
+            <div class="onboarding-message"><span>OUR PHILOSOPHY</span><h2>記録は、身体を理解するための言葉。</h2><p>AI×MUSは、数字を競わせるだけのアプリではありません。日々の記録、身体の感覚、目標をつなぎ、あなた自身がトレーニングを判断できるようになることを目指します。</p><div><strong>記録する</strong><strong>理解する</strong><strong>改善する</strong></div></div>
+            <button class="auth-submit registration-next" type="button" data-next-registration="3">理念を確認して次へ</button>
+          </section>
+          <section class="registration-step" data-registration-step="3">
+            <div class="onboarding-message start"><span>READY?</span><h2>さあ、トレーニングを始めよう！</h2><p>最初から完璧な記録は必要ありません。今日の体重、今日の1セットから始めて、AIトレーナーと一緒に自分だけのデータを育てていきます。</p></div>
+            <button class="auth-submit registration-next" type="button" data-next-registration="4">基本情報を設定する</button>
+          </section>
+          <section class="registration-step" data-registration-step="4">
+            <div class="auth-heading"><p class="eyebrow">STEP 4 / 4</p><h2>体重・目標などの設定</h2><p>ここで入力した内容を、メニューとAIアドバイスの初期基準にします。</p></div>
+            <div class="auth-field-grid">
+              <label>ユーザーネーム<input name="username" type="text" autocomplete="nickname" maxlength="30" required></label>
+              <label>生年月日<input name="birth_date" type="date" autocomplete="bday" required></label>
+              <label>現在の体重<input name="weight_kg" type="number" min="20.1" max="400" step="0.1" required><span>kg</span></label>
+              <label>目標体重（任意）<input name="target_weight_kg" type="number" min="20.1" max="400" step="0.1"><span>kg</span></label>
+              <label>目的<select name="purpose"><option value="general">一般トレーニー</option><option value="bodybuilding">ボディビルダー・フィジーカー</option><option value="powerlifting">パワーリフター</option><option value="athlete">アスリート</option></select></label>
+            </div>
+            <label>具体的な目標（任意）<textarea name="goal_text" maxlength="300" placeholder="例：ベンチプレス150kg、体脂肪率を落とす、競技復帰"></textarea></label>
+            <fieldset class="registration-big3">
+              <legend>BIG3 最大重量</legend>
+              <p>実測した1RMを入力してください。まだ記録がない種目は「記録なし」を選択できます。</p>
+              <div class="registration-big3-grid">
+                <label><strong>ベンチプレス</strong><span><input name="bench_max" type="number" min="1" max="1000" step="0.5" placeholder="kg"></span><em><input type="checkbox" data-big3-none="bench_max"> 記録なし</em></label>
+                <label><strong>スクワット</strong><span><input name="squat_max" type="number" min="1" max="1000" step="0.5" placeholder="kg"></span><em><input type="checkbox" data-big3-none="squat_max"> 記録なし</em></label>
+                <label><strong>デッドリフト</strong><span><input name="deadlift_max" type="number" min="1" max="1000" step="0.5" placeholder="kg"></span><em><input type="checkbox" data-big3-none="deadlift_max"> 記録なし</em></label>
+              </div>
+            </fieldset>
+            <label class="auth-consent"><input name="notifications" type="checkbox" checked><span><strong>通知を許可する</strong><small>解析完了、メニュー変更、フォーム注意を通知します。</small></span></label>
+            <button class="auth-submit" type="submit">設定を保存してホームへ</button>
+          </section>
+          <p class="auth-error" id="registerError"></p>
+        </form>
+
+        <form class="auth-form" id="forgotPasswordForm">
+          <div class="auth-heading"><p class="eyebrow">PASSWORD RESET</p><h2>パスワードを再設定</h2><p>登録したメールアドレスへ、30分間有効な再設定リンクを送ります。</p></div>
+          <label>メールアドレス<input name="email" type="email" autocomplete="email" required></label>
+          <p class="auth-error" id="forgotPasswordMessage"></p>
+          <button class="auth-submit" type="submit">再設定メールを送る</button>
+          <button class="auth-back-button" type="button" data-auth-mode="login">ログインへ戻る</button>
+        </form>
+
+        <form class="auth-form" id="resetPasswordForm">
+          <div class="auth-heading"><p class="eyebrow">NEW PASSWORD</p><h2>新しいパスワード</h2><p>8文字以上で設定してください。</p></div>
+          <label>新しいパスワード<span class="password-field"><input name="password" type="password" minlength="8" maxlength="128" required><button type="button" data-toggle-password>表示</button></span></label>
+          <label>パスワード確認<span class="password-field"><input name="password_confirm" type="password" minlength="8" maxlength="128" required><button type="button" data-toggle-password>表示</button></span></label>
+          <p class="auth-error" id="resetPasswordMessage"></p>
+          <button class="auth-submit" type="submit">パスワードを変更</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="AI×MUS ホーム">
+        <span class="brand-mark">A</span>
+        <span>AI×MUS</span>
+      </a>
+
+      <nav class="nav" aria-label="メインナビゲーション">
+        <button class="nav-item active" data-page="dashboard">
+          <span class="nav-icon">⌂</span><span>ホーム</span>
+        </button>
+        <button class="nav-item" data-page="calendar">
+          <span class="nav-icon">□</span><span>カレンダー</span>
+        </button>
+        <button class="nav-item" data-page="progress">
+          <span class="nav-icon">⌁</span><span>成長グラフ</span>
+        </button>
+        <button class="nav-item" data-page="plan">
+          <span class="nav-icon">▤</span><span>メニュー</span>
+        </button>
+        <button class="nav-item" data-page="recovery">
+          <span class="nav-icon">♡</span><span>疲労・痛み</span>
+        </button>
+        <button class="nav-item" data-page="coach">
+          <span class="nav-icon">✦</span><span>AIトレーナー</span>
+        </button>
+        <button class="nav-item" data-page="settings">
+          <span class="nav-icon">⚙</span><span>設定</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-spacer"></div>
+
+      <div class="goal-card">
+        <div class="goal-card-label">CURRENT GOAL</div>
+        <div class="goal-card-title">筋力アップ</div>
+        <div class="goal-card-row">
+          <span>ベンチプレス 100kg</span>
+          <span>82%</span>
+        </div>
+        <div class="progress-track"><span style="width:82%"></span></div>
+        <div class="goal-card-note">あと 17.5kg</div>
+      </div>
+
+      <button class="profile">
+        <span class="avatar">YK</span>
+        <span class="profile-copy"><strong>Yuta K.</strong><small>中級トレーニー</small></span>
+        <span class="more">•••</span>
+      </button>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="mobile-menu" aria-label="メニューを開く">☰</button>
+        <div class="breadcrumb"><span>AI×MUS</span><b>/</b><strong>ダッシュボード</strong></div>
+        <div class="top-actions">
+          <button class="icon-button" aria-label="通知"><span>●</span>♢</button>
+          <button class="primary-button" id="quickLogButton"><span>＋</span> 記録する</button>
+        </div>
+      </header>
+
+      <div class="content page-view active dashboard-home" id="dashboardPage">
+        <section class="welcome">
+          <div>
+            <p class="eyebrow">WEDNESDAY, JUNE 10</p>
+            <h1>今日も積み上げよう、<span>Yuta。</span></h1>
+            <p>前回より少し強く。今日のメニューを確認して始めましょう。</p>
+          </div>
+          <div class="readiness">
+            <div class="readiness-ring"><span>84</span><small>GOOD</small></div>
+            <div>
+              <small>本日のコンディション</small>
+              <strong>トレーニングに最適</strong>
+              <p>睡眠と疲労度から算出</p>
+            </div>
+          </div>
+        </section>
+        <section class="new-user-start" id="newUserStart">
+          <div><p class="eyebrow">DAY 1</p><h2>今日から記録を始めましょう</h2><p>まだトレーニング記録はありません。最初の記録を追加すると、カレンダー、成長グラフ、AIアドバイスがあなたのデータで更新されます。</p></div>
+          <div class="new-user-actions"><button type="button" data-empty-action="record">最初のトレーニングを記録</button><button type="button" data-empty-action="plan">週間メニューを作る</button></div>
+        </section>
+
+        <section class="home-summary-board">
+          <article class="home-month-card">
+            <div class="home-month-heading">
+              <div><small>MONTHLY TRAINING</small><strong>June <span>2026</span></strong></div>
+              <button type="button" data-open-page="calendar">すべて見る →</button>
+            </div>
+            <div class="mini-calendar-week"><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span></div>
+            <div class="mini-month-grid">
+              <i></i><i></i><i></i><i></i><i></i><i></i><b>1</b>
+              <b class="trained">2</b><b>3</b><b class="trained">4</b><b>5</b><b class="trained">6</b><b>7</b><b>8</b>
+              <b class="trained">9</b><b class="trained">10</b><b>11</b><b class="planned">12</b><b>13</b><b class="today">14</b><b>15</b>
+              <b class="planned">16</b><b>17</b><b class="planned">18</b><b>19</b><b>20</b><b class="planned">21</b><b>22</b>
+              <b>23</b><b class="planned">24</b><b>25</b><b>26</b><b class="planned">27</b><b>28</b><b>29</b>
+              <b>30</b>
+            </div>
+            <div class="month-total"><div><strong>9</strong><span>今月の実施日</span></div><div><strong>10.4h</strong><span>合計時間</span></div><div><strong>52.4t</strong><span>総負荷量</span></div></div>
+          </article>
+          <article class="home-volume-card">
+            <div><small>WEEKLY LOAD / 5 WEEKS</small><strong>18,420 <span>kg</span></strong><p>先週比 <b>+2.8%</b></p></div>
+            <div class="home-load-bars"><i style="height:54%"></i><i style="height:65%"></i><i style="height:61%"></i><i style="height:78%"></i><i class="active" style="height:88%"></i></div>
+            <div class="home-load-labels"><span>5週前</span><span>4週前</span><span>3週前</span><span>先週</span><span>今週</span></div>
+          </article>
+        </section>
+
+        <section class="home-quick-actions">
+          <button type="button" id="homeQuickLog"><span>＋</span><strong>本日のトレーニングを記録</strong></button>
+          <button type="button" id="homeRmShortcut"><span>RM</span><strong>RM計算機</strong></button>
+        </section>
+
+        <section class="stats-grid">
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon lime">↗</span><small>今週のトレーニング</small></div>
+            <div class="stat-value">3<span>/ 4 回</span></div>
+            <div class="mini-bars" aria-label="今週のトレーニング実績">
+              <i class="done"></i><i class="done"></i><i class="done"></i><i></i>
+            </div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon purple">⌁</span><small>週間ボリューム</small></div>
+            <div class="stat-value">18,420<span>kg</span></div>
+            <div class="trend positive">↗ 8.4% <span>先週比</span></div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon orange">◇</span><small>現在の体重</small></div>
+            <div class="stat-value" id="currentWeight">74.2<span>kg</span></div>
+            <div class="trend negative">↘ 0.4kg <span>30日間</span></div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon blue">★</span><small>連続記録</small></div>
+            <div class="stat-value">12<span>日</span></div>
+            <div class="trend neutral">自己ベストまであと 4日</div>
+          </article>
+        </section>
+
+        <section class="dashboard-grid">
+          <article class="panel workout-panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">TODAY'S WORKOUT</p>
+                <h2 id="homeWorkoutTitle">Upper A <span>・胸 / 肩 / 三頭</span></h2>
+              </div>
+              <div class="duration" id="homeWorkoutDuration"><span>◷</span> 約 65分</div>
+            </div>
+
+            <div class="exercise-list" id="homeExerciseList">
+              <div class="exercise-row">
+                <div class="exercise-number">01</div>
+                <div class="exercise-name"><strong>ベンチプレス</strong><span>メイン種目</span></div>
+                <div class="exercise-target"><small>セット</small><strong>4</strong></div>
+                <div class="exercise-target"><small>回数</small><strong>5</strong></div>
+                <div class="exercise-target"><small>目標重量</small><strong>82.5 <em>kg</em></strong></div>
+                <span class="exercise-status">PR候補</span>
+              </div>
+              <div class="exercise-row">
+                <div class="exercise-number">02</div>
+                <div class="exercise-name"><strong>インクラインDBプレス</strong><span>上部胸筋</span></div>
+                <div class="exercise-target"><small>セット</small><strong>3</strong></div>
+                <div class="exercise-target"><small>回数</small><strong>8–10</strong></div>
+                <div class="exercise-target"><small>目標重量</small><strong>26 <em>kg</em></strong></div>
+                <span class="exercise-status muted">維持</span>
+              </div>
+              <div class="exercise-row">
+                <div class="exercise-number">03</div>
+                <div class="exercise-name"><strong>ショルダープレス</strong><span>三角筋前部</span></div>
+                <div class="exercise-target"><small>セット</small><strong>3</strong></div>
+                <div class="exercise-target"><small>回数</small><strong>8</strong></div>
+                <div class="exercise-target"><small>目標重量</small><strong>40 <em>kg</em></strong></div>
+                <span class="exercise-status muted">+2.5kg</span>
+              </div>
+              <div class="exercise-row exercise-more">
+                <span>＋ 3 種目</span>
+                <small>サイドレイズ、プレスダウン、フェイスプル</small>
+              </div>
+            </div>
+
+            <button class="start-button" id="startWorkoutButton">
+              <span class="play">▶</span>
+              <span><strong>トレーニングを開始</strong><small>セットごとに記録できます</small></span>
+              <span class="arrow">→</span>
+            </button>
+          </article>
+
+          <aside class="right-column">
+            <article class="panel ai-card">
+              <div class="ai-heading">
+                <span class="ai-mark">✦</span>
+                <div><small>AI×MUS AI</small><strong>今日の調整提案</strong></div>
+                <span class="live-dot">LIVE</span>
+              </div>
+              <p>直近3回の記録と本日のコンディションから、ベンチプレスの負荷を調整しました。</p>
+              <div class="adjustment">
+                <div><small>前回</small><strong>80.0 <span>kg</span></strong></div>
+                <span class="adjust-arrow">→</span>
+                <div><small>今日の提案</small><strong class="lime-text">82.5 <span>kg</span></strong></div>
+              </div>
+              <div class="reason"><span>✦</span><p><strong>調整の理由</strong>全セットをRPE 7.5で完遂。回復状態も良好なため、2.5kgの漸進を提案します。</p></div>
+              <div class="ai-actions">
+                <button class="accept-button" id="acceptButton">提案を採用</button>
+                <button class="secondary-button" id="adjustButton">調整する</button>
+              </div>
+            </article>
+
+            <article class="panel next-card">
+              <div class="panel-header compact">
+                <div><p class="eyebrow">NEXT UP</p><h3>今週の予定</h3></div>
+                <button>すべて見る →</button>
+              </div>
+              <div class="schedule-row"><span class="date-box"><b>12</b><small>FRI</small></span><div><strong>Lower A</strong><small>脚 / 臀部・約70分</small></div><span>→</span></div>
+              <div class="schedule-row"><span class="date-box"><b>14</b><small>SUN</small></span><div><strong>Upper B</strong><small>背中 / 二頭・約60分</small></div><span>→</span></div>
+            </article>
+          </aside>
+        </section>
+
+        <section class="panel recent-workout-panel">
+          <div class="panel-header compact">
+            <div><p class="eyebrow">LATEST RECORD</p><h3>前回のトレーニング記録</h3></div>
+            <button class="text-link" data-open-page="calendar">履歴を見る →</button>
+          </div>
+          <div class="recent-record-summary">
+            <div class="recent-date"><strong>10</strong><span>JUN</span></div>
+            <div class="recent-session"><strong>Lower A・脚 / 尻</strong><span>68分・5種目・総ボリューム 6,840kg</span></div>
+            <div class="recent-score"><small>平均RPE</small><strong>7.8</strong></div>
+          </div>
+          <div class="recent-exercises">
+            <div><strong>スクワット</strong><span>110kg × 5回 × 4セット</span><b>推定1RM 128.3kg</b></div>
+            <div><strong>ルーマニアンデッドリフト</strong><span>80kg × 8回 × 3セット</span><b>RPE 8</b></div>
+            <div><strong>ブルガリアンスクワット</strong><span>24kg × 10回 × 3セット</span><b>RPE 8.5</b></div>
+          </div>
+        </section>
+
+        <section class="home-tools-grid">
+          <article class="panel rm-calculator">
+            <div class="panel-header compact">
+              <div><p class="eyebrow">1RM CALCULATOR</p><h3>RM計算機</h3></div>
+              <span class="updated">Epley式</span>
+            </div>
+            <p class="tool-description">重量と反復回数から推定1RMを計算します。</p>
+            <div class="rm-inputs">
+              <label>使用重量<span><input id="rmWeightInput" type="number" value="80" min="0" step="0.5"><b>kg</b></span></label>
+              <label>反復回数<span><input id="rmRepsInput" type="number" value="5" min="1" max="30"><b>回</b></span></label>
+            </div>
+            <div class="rm-result"><div><small>推定1RM</small><strong id="rmResult">93.3 <span>kg</span></strong></div><div><small>80%重量</small><strong id="rmEightyResult">74.7 <span>kg</span></strong></div></div>
+            <p class="rm-note">実際の最大挙上重量とは差が出る場合があります。</p>
+          </article>
+
+          <article class="panel weekly-volume-chart">
+            <div class="panel-header compact">
+              <div><p class="eyebrow">WEEKLY VOLUME</p><h3>5週間のトレーニングボリューム</h3></div>
+              <strong class="volume-current">18,420 <span>kg</span></strong>
+            </div>
+            <div class="volume-bars">
+              <div><span style="height:62%"></span><b>14,260</b><small>5週前</small></div>
+              <div><span style="height:71%"></span><b>16,180</b><small>4週前</small></div>
+              <div><span style="height:68%"></span><b>15,540</b><small>3週前</small></div>
+              <div><span style="height:82%"></span><b>17,920</b><small>先週</small></div>
+              <div class="current"><span style="height:88%"></span><b>18,420</b><small>今週</small></div>
+            </div>
+          </article>
+        </section>
+
+        <section class="bottom-grid">
+          <article class="panel chart-panel">
+            <div class="panel-header compact">
+              <div><p class="eyebrow">PROGRESS</p><h3>ベンチプレス 推定1RM</h3></div>
+              <button class="period-select">過去3ヶ月⌄</button>
+            </div>
+            <div class="chart-summary"><strong>96.8 <span>kg</span></strong><span class="trend positive">↗ 6.8kg</span></div>
+            <div class="chart" aria-label="ベンチプレス推定1RMの推移">
+              <div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div>
+              <svg viewBox="0 0 600 130" preserveAspectRatio="none" role="img">
+                <defs>
+                  <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#c8f45b" stop-opacity=".25"/>
+                    <stop offset="1" stop-color="#c8f45b" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path class="chart-area" d="M0,112 C65,109 78,95 128,94 S205,77 250,80 S318,61 365,65 S430,46 475,49 S545,20 600,22 L600,130 L0,130Z"/>
+                <path class="chart-line" d="M0,112 C65,109 78,95 128,94 S205,77 250,80 S318,61 365,65 S430,46 475,49 S545,20 600,22"/>
+                <circle cx="600" cy="22" r="5"/>
+              </svg>
+              <div class="chart-labels"><span>3月</span><span>4月</span><span>5月</span><span>6月</span></div>
+            </div>
+          </article>
+
+          <article class="panel recovery-panel">
+            <div class="panel-header compact">
+              <div><p class="eyebrow">RECOVERY</p><h3>部位別リカバリー</h3></div>
+              <span class="updated">本日更新</span>
+            </div>
+            <div class="muscle-row"><div><strong>胸</strong><span>前回から 48時間</span></div><div class="recovery-bar"><i style="width:92%"></i></div><b>92%</b></div>
+            <div class="muscle-row"><div><strong>背中</strong><span>前回から 72時間</span></div><div class="recovery-bar"><i style="width:100%"></i></div><b>100%</b></div>
+            <div class="muscle-row"><div><strong>脚</strong><span>前回から 24時間</span></div><div class="recovery-bar orange-bar"><i style="width:58%"></i></div><b>58%</b></div>
+            <div class="muscle-row"><div><strong>肩</strong><span>前回から 48時間</span></div><div class="recovery-bar"><i style="width:86%"></i></div><b>86%</b></div>
+          </article>
+        </section>
+      </div>
+
+      <div class="content page-view" id="progressPage">
+        <section class="progress-hero">
+          <div>
+            <p class="eyebrow">PERFORMANCE TRACKING</p>
+            <h1>進捗</h1>
+            <p>体重と種目別パフォーマンスの変化を確認できます。</p>
+          </div>
+          <label class="progress-exercise-select">表示する種目
+            <select id="progressExerciseSelect">
+              <option value="bench">ベンチプレス</option>
+              <option value="squat">スクワット</option>
+              <option value="deadlift">デッドリフト</option>
+              <option value="shoulder">ショルダープレス</option>
+            </select>
+          </label>
+        </section>
+
+        <section class="progress-summary-grid">
+          <article class="progress-metric panel">
+            <span class="metric-icon orange">◇</span>
+            <div><small>現在の体重</small><strong id="progressWeight">74.2 <em>kg</em></strong><p class="down">−0.4kg / 30日</p></div>
+          </article>
+          <article class="progress-metric panel">
+            <span class="metric-icon lime">↑</span>
+            <div><small>最大使用重量</small><strong id="maxWeightValue">90.0 <em>kg</em></strong><p id="maxWeightChange">+5.0kg / 3ヶ月</p></div>
+          </article>
+          <article class="progress-metric panel featured">
+            <span class="metric-icon purple">1</span>
+            <div><small>推定 1RM</small><strong id="oneRmValue">96.8 <em>kg</em></strong><p id="oneRmChange">自己ベスト更新中</p></div>
+          </article>
+          <article class="progress-metric panel">
+            <span class="metric-icon blue">⌁</span>
+            <div><small>期間ボリューム</small><strong id="volumeValue">24,680 <em>kg</em></strong><p id="volumeChange">+8.4% / 前期間比</p></div>
+          </article>
+        </section>
+
+        <section class="progress-main-grid">
+          <article class="panel performance-chart-panel">
+            <div class="panel-header compact">
+              <div><p class="eyebrow">EXERCISE PROGRESS</p><h3 id="progressChartTitle">ベンチプレスの推移</h3></div>
+              <div class="chart-tabs">
+                <button class="chart-tab active" data-metric="oneRm">1RM</button>
+                <button class="chart-tab" data-metric="max">最大重量</button>
+                <button class="chart-tab" data-metric="volume">ボリューム</button>
+              </div>
+            </div>
+            <div class="large-chart-summary">
+              <strong id="chartMainValue">96.8 <span>kg</span></strong>
+              <span id="chartDelta">↗ 7.6%</span>
+            </div>
+            <div class="performance-chart">
+              <div class="axis-labels"><span>100</span><span>95</span><span>90</span><span>85</span></div>
+              <svg viewBox="0 0 700 220" preserveAspectRatio="none" aria-label="種目の進捗グラフ">
+                <defs><linearGradient id="progressArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c8f45b" stop-opacity=".28"/><stop offset="1" stop-color="#c8f45b" stop-opacity="0"/></linearGradient></defs>
+                <g class="progress-grid-lines"><line x1="0" y1="25" x2="700" y2="25"/><line x1="0" y1="80" x2="700" y2="80"/><line x1="0" y1="135" x2="700" y2="135"/><line x1="0" y1="190" x2="700" y2="190"/></g>
+                <path id="progressChartArea" class="progress-chart-area" d="M0,185 C90,178 105,160 175,158 S270,135 350,140 S450,105 525,112 S625,60 700,48 L700,220 L0,220Z"/>
+                <path id="progressChartLine" class="progress-chart-line" d="M0,185 C90,178 105,160 175,158 S270,135 350,140 S450,105 525,112 S625,60 700,48"/>
+                <circle id="progressChartPoint" cx="700" cy="48" r="6"/>
+              </svg>
+              <div class="progress-chart-labels"><span>3/10</span><span>3/31</span><span>4/21</span><span>5/12</span><span>6/2</span><span>6/10</span></div>
+            </div>
+          </article>
+
+          <article class="panel goal-panel">
+            <div class="goal-panel-heading"><span>★</span><div><p class="eyebrow">NEXT TARGET</p><h3>次の1RM目標</h3></div></div>
+            <div class="current-max"><small>現在の推定1RM</small><strong id="goalCurrentOneRm">96.8 <span>kg</span></strong></div>
+            <label>目標重量
+              <div class="goal-input-wrap"><input id="goalWeightInput" type="number" value="100" min="1" step="0.5"><span>kg</span></div>
+            </label>
+            <div class="goal-difference"><span>目標まで</span><strong id="goalDifference">あと 3.2kg</strong></div>
+            <div class="goal-progress-track"><i id="goalProgressBar" style="width:96.8%"></i></div>
+            <div class="goal-progress-copy"><span>現在</span><b id="goalProgressPercent">96.8%</b><span>目標</span></div>
+            <button class="goal-save-button" id="saveGoalButton">目標を設定</button>
+            <p class="goal-note">現在の推移では約2〜4週間で到達見込みです。</p>
+          </article>
+        </section>
+
+        <section class="panel weight-growth-panel">
+          <div class="panel-header compact">
+            <div><p class="eyebrow">BODY WEIGHT</p><h3>体重の推移</h3></div>
+            <div class="weight-summary"><strong>74.2kg</strong><span>−0.4kg / 30日</span></div>
+          </div>
+          <div class="weight-line-chart">
+            <svg viewBox="0 0 900 150" preserveAspectRatio="none" aria-label="体重の折れ線グラフ">
+              <g><line x1="0" y1="25" x2="900" y2="25"/><line x1="0" y1="75" x2="900" y2="75"/><line x1="0" y1="125" x2="900" y2="125"/></g>
+              <path d="M0,30 C100,34 135,46 220,43 S340,65 440,62 S560,83 660,78 S790,105 900,112"/>
+              <circle cx="900" cy="112" r="5"/>
+            </svg>
+            <div><span>5/12</span><span>5/19</span><span>5/26</span><span>6/2</span><span>6/9</span></div>
+          </div>
+        </section>
+
+        <section class="panel exercise-overview">
+          <div class="panel-header compact">
+            <div><p class="eyebrow">ALL EXERCISES</p><h3>種目別パフォーマンス</h3></div>
+            <span class="updated">過去3ヶ月</span>
+          </div>
+          <div class="progress-table-wrap">
+            <table class="progress-table">
+              <thead><tr><th>種目</th><th>最大重量</th><th>推定1RM</th><th>ボリューム</th><th>変化</th><th>次の目標</th></tr></thead>
+              <tbody id="progressTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <div class="content page-view" id="planPage">
+        <section class="menu-hero">
+          <div>
+            <p class="eyebrow">PROGRAM BUILDER</p>
+            <h1>トレーニングメニュー</h1>
+            <p>自分で細かく組み立てるか、AIと一緒に週間プランを作成します。</p>
+          </div>
+          <button class="menu-save-button" id="saveWeeklyPlan">週間メニューを保存</button>
+        </section>
+
+        <section class="mode-selector">
+          <button class="mode-card active" data-menu-mode="manual">
+            <span class="mode-number">01</span>
+            <span class="mode-icon">▦</span>
+            <span class="mode-copy"><strong>自分で1から考える</strong><small>曜日ごとに種目・負荷・時間を自由に設定</small></span>
+            <span class="mode-check">✓</span>
+          </button>
+          <button class="mode-card" data-menu-mode="ai">
+            <span class="mode-number">02</span>
+            <span class="mode-icon ai">✦</span>
+            <span class="mode-copy"><strong>AIアシストで考える</strong><small>頻度と分割法から最適な週間プランを提案</small></span>
+            <span class="mode-check">✓</span>
+          </button>
+        </section>
+
+        <section class="menu-mode-panel active" id="manualMenuPanel">
+          <div class="section-title-row">
+            <div><p class="eyebrow">WEEKLY SCHEDULE</p><h2>1週間の予定表</h2><p>曜日を選択してトレーニング内容を追加してください。</p></div>
+            <div class="week-summary"><span><b id="trainingDayCount">0</b>日</span><small>トレーニング予定</small></div>
+          </div>
+
+          <div class="week-tabs" id="weekTabs">
+            <button class="week-tab active" data-day="mon"><small>MON</small><strong>月</strong><span>休養日</span></button>
+            <button class="week-tab" data-day="tue"><small>TUE</small><strong>火</strong><span>休養日</span></button>
+            <button class="week-tab" data-day="wed"><small>WED</small><strong>水</strong><span>休養日</span></button>
+            <button class="week-tab" data-day="thu"><small>THU</small><strong>木</strong><span>休養日</span></button>
+            <button class="week-tab" data-day="fri"><small>FRI</small><strong>金</strong><span>休養日</span></button>
+            <button class="week-tab" data-day="sat"><small>SAT</small><strong>土</strong><span>休養日</span></button>
+            <button class="week-tab" data-day="sun"><small>SUN</small><strong>日</strong><span>休養日</span></button>
+          </div>
+
+          <article class="panel day-editor">
+            <div class="day-editor-header">
+              <div><p class="eyebrow" id="editorDayEnglish">MONDAY</p><h3 id="editorDayTitle">月曜日のメニュー</h3></div>
+              <label class="total-time-input">トータルトレーニング時間
+                <span><input id="totalTrainingTime" type="number" min="0" step="5" value="0"><b>分</b></span>
+              </label>
+            </div>
+            <div class="day-exercises" id="dayExercises">
+              <div class="day-empty"><span>＋</span><strong>種目はまだありません</strong><small>下のボタンから最初の種目を追加してください</small></div>
+            </div>
+            <button class="add-day-exercise" id="addDayExercise" type="button">＋ 種目を追加</button>
+          </article>
+        </section>
+
+        <section class="menu-mode-panel" id="aiMenuPanel">
+          <article class="panel ai-wizard">
+            <div class="ai-builder-heading"><span>✦</span><div><p class="eyebrow">AI×MUS AI PROGRAM</p><h2>あなた専用の週間プランを作成</h2><p>5つの質問から、現在の体重と記録に合わせたメニューを組み立てます。</p></div></div>
+            <div class="wizard-progress">
+              <div class="wizard-progress-line"><i id="wizardProgressLine"></i></div>
+              <button class="wizard-dot active" data-wizard-nav="1"><span>1</span><small>頻度</small></button>
+              <button class="wizard-dot" data-wizard-nav="2"><span>2</span><small>時間</small></button>
+              <button class="wizard-dot" data-wizard-nav="3"><span>3</span><small>目的</small></button>
+              <button class="wizard-dot" data-wizard-nav="4"><span>4</span><small>分割</small></button>
+              <button class="wizard-dot" data-wizard-nav="5"><span>5</span><small>こだわり</small></button>
+            </div>
+
+            <div class="wizard-pages">
+              <section class="wizard-page active" data-wizard-step="1">
+                <div class="wizard-question"><span>STEP 01</span><h3>1週間に何回トレーニングしますか？</h3><p>無理なく継続できる頻度を選択してください。</p></div>
+                <div class="choice-grid frequency-choice">
+                  <button type="button" data-frequency="2"><strong>2</strong><span>回 / 週</span><small>ゆったり継続</small></button>
+                  <button type="button" data-frequency="3" class="active"><strong>3</strong><span>回 / 週</span><small>バランス型</small></button>
+                  <button type="button" data-frequency="4"><strong>4</strong><span>回 / 週</span><small>しっかり成長</small></button>
+                  <button type="button" data-frequency="5"><strong>5</strong><span>回 / 週</span><small>高頻度</small></button>
+                  <button type="button" data-frequency="6"><strong>6</strong><span>回 / 週</span><small>競技志向</small></button>
+                </div>
+              </section>
+
+              <section class="wizard-page" data-wizard-step="2">
+                <div class="wizard-question"><span>STEP 02</span><h3>1回あたり何分トレーニングできますか？</h3><p>ウォームアップとクールダウンを含む時間です。</p></div>
+                <div class="choice-grid time-choice">
+                  <button type="button" data-duration="30"><strong>30分</strong><small>短時間・高効率</small></button>
+                  <button type="button" data-duration="45"><strong>45分</strong><small>コンパクト</small></button>
+                  <button type="button" data-duration="60" class="active"><strong>60分</strong><small>標準</small></button>
+                  <button type="button" data-duration="75"><strong>75分</strong><small>充実</small></button>
+                  <button type="button" data-duration="90"><strong>90分</strong><small>じっくり</small></button>
+                  <button type="button" data-duration="120"><strong>120分</strong><small>ロングセッション</small></button>
+                </div>
+              </section>
+
+              <section class="wizard-page" data-wizard-step="3">
+                <div class="wizard-question"><span>STEP 03</span><h3>主な目的を選択してください</h3><p>種目構成、回数帯、休憩時間の決定に反映します。</p></div>
+                <div class="purpose-choice">
+                  <button type="button" data-purpose="general" class="active"><span>HEALTH</span><strong>一般トレーニー</strong><small>健康維持・ダイエット・基礎体力</small></button>
+                  <button type="button" data-purpose="bodybuilding"><span>PHYSIQUE</span><strong>ボディビルダー・フィジーカー</strong><small>筋肥大・プロポーション・弱点改善</small></button>
+                  <button type="button" data-purpose="powerlifting"><span>STRENGTH</span><strong>パワーリフター</strong><small>SBDの最大筋力・試合パフォーマンス</small></button>
+                  <button type="button" data-purpose="athlete"><span>SPORT</span><strong>アスリート</strong><small>競技力・パワー・動作能力</small></button>
+                </div>
+              </section>
+
+              <section class="wizard-page" data-wizard-step="4">
+                <div class="wizard-question"><span>STEP 04</span><h3>トレーニング分割を選択してください</h3><p>選択した頻度に合わせて曜日へ配置します。</p></div>
+                <div class="split-options wizard-split-options">
+                  <button type="button" data-split="full"><strong>全身法</strong><small>毎回、全身をバランス良く</small></button>
+                  <button type="button" data-split="2" class="active"><strong>2分割</strong><small>上半身 / 下半身</small></button>
+                  <button type="button" data-split="3"><strong>3分割</strong><small>押す / 引く / 脚</small></button>
+                  <button type="button" data-split="5"><strong>5分割</strong><small>胸 / 背中 / 脚 / 肩 / 腕</small></button>
+                </div>
+              </section>
+
+              <section class="wizard-page" data-wizard-step="5">
+                <div class="wizard-question"><span>STEP 05</span><h3>メニューへのこだわりを教えてください</h3><p>好きな種目、避けたい動作、伸ばしたい部位などを自由に入力できます。</p></div>
+                <label class="preference-field">こだわり・要望
+                  <textarea id="aiPreference" placeholder="例：ベンチプレスを週2回入れたい。膝に不安があるので高重量スクワットは避けたい。肩幅を重点的に伸ばしたい。"></textarea>
+                </label>
+                <div class="profile-reference">
+                  <span>参照する現在のデータ</span>
+                  <div><strong id="aiCurrentWeight">74.2kg</strong><small>体重</small></div>
+                  <div><strong>96.8kg</strong><small>ベンチ推定1RM</small></div>
+                  <div><strong>136.5kg</strong><small>スクワット推定1RM</small></div>
+                  <div><strong>169.2kg</strong><small>デッドリフト推定1RM</small></div>
+                </div>
+              </section>
+            </div>
+
+            <div class="wizard-actions">
+              <button class="wizard-back" id="wizardBack" type="button">← 戻る</button>
+              <button class="wizard-next" id="wizardNext" type="button">次へ →</button>
+              <button class="generate-plan-button" id="generateAiPlan" type="button"><span>✦</span> AIメニューを作成</button>
+            </div>
+          </article>
+
+          <section class="ai-result" id="aiPlanResult">
+            <div class="ai-result-header">
+              <div><p class="eyebrow">YOUR AI PROGRAM</p><h2>AIが作成した週間メニュー</h2><p id="aiResultSummary"></p></div>
+              <button type="button" id="editAiConditions">条件を編集</button>
+            </div>
+            <div class="generated-week" id="generatedWeek"></div>
+          </section>
+        </section>
+      </div>
+
+      <div class="content page-view" id="calendarPage">
+        <section class="subpage-hero">
+          <div><p class="eyebrow">TRAINING HISTORY</p><h1>トレーニングカレンダー</h1><p>頻度を確認し、日付を押して実施内容を振り返れます。</p></div>
+          <div class="month-switcher"><button type="button">←</button><strong>2026年 6月</strong><button type="button">→</button></div>
+        </section>
+        <section class="calendar-summary">
+          <article><small>今月の頻度</small><strong>9<span>回</span></strong><p>目標 16回</p></article>
+          <article><small>総トレーニング時間</small><strong>10.4<span>時間</span></strong><p>平均 69分 / 回</p></article>
+          <article><small>総ボリューム</small><strong>52,480<span>kg</span></strong><p class="lime-text">先月比 +7.2%</p></article>
+        </section>
+        <section class="calendar-layout">
+          <article class="panel calendar-card">
+            <div class="calendar-weekdays"><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span></div>
+            <div class="calendar-grid" id="trainingCalendar">
+              <button class="outside"><b>25</b></button><button class="outside"><b>26</b></button><button class="outside"><b>27</b></button><button class="outside"><b>28</b></button><button class="outside"><b>29</b></button><button class="outside"><b>30</b></button><button><b>1</b></button>
+              <button class="trained" data-calendar-day="2"><b>2</b><span>Upper A</span></button><button><b>3</b></button><button class="trained" data-calendar-day="4"><b>4</b><span>Lower A</span></button><button><b>5</b></button><button class="trained" data-calendar-day="6"><b>6</b><span>Upper B</span></button><button><b>7</b></button><button><b>8</b></button>
+              <button class="trained selected" data-calendar-day="9"><b>9</b><span>Lower B</span></button><button class="trained" data-calendar-day="10"><b>10</b><span>Lower A</span></button><button><b>11</b></button><button class="planned"><b>12</b><span>Upper A</span></button><button><b>13</b></button><button class="planned"><b>14</b><span>Upper B</span></button><button><b>15</b></button>
+              <button class="planned"><b>16</b><span>Lower B</span></button><button><b>17</b></button><button class="planned"><b>18</b><span>Upper A</span></button><button><b>19</b></button><button><b>20</b></button><button class="planned"><b>21</b><span>Lower A</span></button><button><b>22</b></button>
+              <button><b>23</b></button><button class="planned"><b>24</b><span>Upper B</span></button><button><b>25</b></button><button><b>26</b></button><button class="planned"><b>27</b><span>Lower B</span></button><button><b>28</b></button><button><b>29</b></button>
+              <button><b>30</b></button><button class="outside"><b>1</b></button><button class="outside"><b>2</b></button><button class="outside"><b>3</b></button><button class="outside"><b>4</b></button><button class="outside"><b>5</b></button><button class="outside"><b>6</b></button>
+            </div>
+          </article>
+          <aside class="panel calendar-detail" id="calendarDetail">
+            <p class="eyebrow">JUNE 9</p><h2>Lower B</h2><p class="detail-meta">脚 / 尻・72分・平均RPE 8.1</p>
+            <div class="history-exercise"><strong>スクワット</strong><span>107.5kg × 5 × 4</span><b>RPE 8</b></div>
+            <div class="history-exercise"><strong>ヒップスラスト</strong><span>100kg × 8 × 3</span><b>RPE 8.5</b></div>
+            <div class="history-exercise"><strong>レッグカール</strong><span>35kg × 12 × 3</span><b>RPE 8</b></div>
+            <div class="history-note"><small>メモ</small><p>腰の張りはなし。スクワットの深さも安定。</p></div>
+          </aside>
+        </section>
+      </div>
+
+      <div class="content page-view" id="recoveryPage">
+        <section class="subpage-hero"><div><p class="eyebrow">BODY STATUS</p><h1>疲労・痛み管理</h1><p>回復状態と痛みの推移を確認し、負荷調整に役立てます。</p></div><div class="status-pill good">回復状態 84 / 100</div></section>
+        <section class="recovery-summary-grid">
+          <article class="panel recovery-score-card"><div class="big-ring"><strong>84</strong><small>GOOD</small></div><div><small>総合回復スコア</small><h2>トレーニング可能</h2><p>睡眠7.5時間・疲労度2・痛み1箇所</p></div></article>
+          <article class="panel fatigue-trend"><p class="eyebrow">FATIGUE TREND</p><h3>全身疲労度</h3><div class="fatigue-bars"><i style="height:35%"></i><i style="height:48%"></i><i style="height:30%"></i><i style="height:62%"></i><i style="height:45%"></i><i style="height:25%"></i><i class="today" style="height:38%"></i></div><div class="bar-labels"><span>金</span><span>土</span><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span></div></article>
+        </section>
+        <section class="recovery-page-grid">
+          <article class="panel body-status-card"><div class="panel-header compact"><div><p class="eyebrow">PAIN MAP</p><h3>現在の痛み・違和感</h3></div><button class="text-link" id="openPainLog">＋ 記録</button></div><div class="pain-status-list"><div><span class="pain-level mild"></span><strong>右肩</strong><p>プレス動作で軽い違和感</p><b>2 / 10</b></div><div><span class="pain-level clear"></span><strong>腰</strong><p>痛みなし</p><b>0 / 10</b></div><div><span class="pain-level clear"></span><strong>膝</strong><p>痛みなし</p><b>0 / 10</b></div></div></article>
+          <article class="panel recovery-parts"><p class="eyebrow">MUSCLE RECOVERY</p><h3>部位別回復度</h3><div class="recovery-part"><span>胸</span><i><b style="width:92%"></b></i><strong>92%</strong></div><div class="recovery-part"><span>背中</span><i><b style="width:100%"></b></i><strong>100%</strong></div><div class="recovery-part warning"><span>脚</span><i><b style="width:58%"></b></i><strong>58%</strong></div><div class="recovery-part"><span>肩</span><i><b style="width:72%"></b></i><strong>72%</strong></div><div class="recovery-part"><span>腕</span><i><b style="width:88%"></b></i><strong>88%</strong></div></article>
+        </section>
+      </div>
+
+      <div class="content page-view" id="coachPage">
+        <section class="subpage-hero"><div><p class="eyebrow">AI×MUS AI COACH</p><h1>AIトレーナー</h1><p>トレーニング動画と日々の記録から、目的に合わせてフォームと負荷を分析します。</p></div><button class="coach-settings-link" data-open-page="settings">解析設定 ⚙</button></section>
+        <section class="panel video-analysis-workspace">
+          <div class="video-workspace-header">
+            <div><p class="eyebrow">VIDEO FORM ANALYSIS</p><h2>フォーム分析</h2><p>解析する種目を選択し、動画を追加してください。</p></div>
+            <div class="analysis-header-controls">
+              <span class="backend-status checking" id="analysisBackendStatus">解析APIを確認中</span>
+              <label class="analysis-profile-select">分析プロファイル
+                <select id="analysisProfile">
+                  <option value="general">一般トレーニー</option>
+                  <option value="bodybuilding">ボディビルダー・フィジーカー</option>
+                  <option value="powerlifting">パワーリフター</option>
+                  <option value="athlete">アスリート</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div class="lift-selector" aria-label="解析する種目を選択">
+            <button class="lift-choice active" data-video-folder="bench"><strong>ベンチプレス</strong><small><b id="benchVideoCount">0</b> 本の動画</small><span>選択中</span></button>
+            <button class="lift-choice" data-video-folder="squat"><strong>スクワット</strong><small><b id="squatVideoCount">0</b> 本の動画</small><span>選択</span></button>
+            <button class="lift-choice" data-video-folder="deadlift"><strong>デッドリフト</strong><small><b id="deadliftVideoCount">0</b> 本の動画</small><span>選択</span></button>
+          </div>
+          <div class="video-folder-content">
+            <div class="video-dropzone">
+              <input id="trainingVideoInput" type="file" accept="video/*" multiple>
+              <label for="trainingVideoInput"><span>＋</span><strong id="videoDropTitle">ベンチプレス動画を追加</strong><small>MP4 / MOV / WebM・正面または斜め45度から撮影</small></label>
+            </div>
+            <div class="video-file-list" id="videoFileList"><div class="empty-video-folder">このフォルダにはまだ動画がありません</div></div>
+          </div>
+        </section>
+
+        <section class="panel analysis-result-card" id="analysisResultCard">
+          <div class="analysis-empty"><span>✦</span><h3>動画を選択して解析を開始</h3><p>フォーム、テンポ、可動域、重量コントロールを目的別に評価します。</p></div>
+        </section>
+
+        <section class="coach-grid">
+          <article class="panel coach-main"><div class="coach-avatar">✦</div><p class="eyebrow">TODAY'S ADVICE</p><h2>今日は上半身を予定通り実施できます</h2><p>回復スコアは良好ですが、右肩に軽い違和感があります。ベンチプレス前の肩甲帯ウォームアップを丁寧に行い、痛みが3/10を超えたら重量を10%落としてください。</p><div class="coach-actions"><button data-open-page="dashboard">今日のメニューを見る</button><button data-open-page="recovery">身体状態を見る</button></div></article>
+          <aside class="coach-insights"><article class="panel insight-card positive"><span>↗</span><div><small>成長</small><strong>ベンチプレスが順調</strong><p>推定1RMは3ヶ月で7.6%向上しています。</p></div></article><article class="panel insight-card warning"><span>!</span><div><small>注意</small><strong>脚の疲労が残っています</strong><p>次の脚トレーニングまで48時間空けましょう。</p></div></article><article class="panel insight-card"><span>◎</span><div><small>習慣</small><strong>週3回を安定して継続</strong><p>直近4週間の実施率は92%です。</p></div></article></aside>
+        </section>
+        <section class="panel weekly-coach"><div class="panel-header compact"><div><p class="eyebrow">WEEKLY REVIEW</p><h3>今週の改善ポイント</h3></div><span class="updated">AI分析</span></div><div class="coach-tips"><div><b>01</b><strong>睡眠を30分増やす</strong><p>平均睡眠時間を8時間に近づけると、回復スコアの改善が見込めます。</p></div><div><b>02</b><strong>脚のボリュームを維持</strong><p>今週は疲労が高いため、追加セットは不要です。</p></div><div><b>03</b><strong>肩のケアを優先</strong><p>プレス前にバンドプルアパートと外旋運動を追加してください。</p></div></div></section>
+      </div>
+
+      <div class="content page-view" id="settingsPage">
+        <section class="subpage-hero"><div><p class="eyebrow">APP SETTINGS</p><h1>設定</h1><p>AI解析、メニュー反映、通知、参考ソースを管理します。</p></div><span class="settings-saved" id="settingsSaved">保存済み</span></section>
+        <div class="settings-layout">
+          <aside class="settings-nav">
+            <button class="active" data-settings-target="profile">プロフィール</button>
+            <button data-settings-target="exercises">トレーニング種目</button>
+            <button data-settings-target="analysis">AI解析</button>
+            <button data-settings-target="menuApply">メニュー反映</button>
+            <button data-settings-target="notifications">通知</button>
+            <button data-settings-target="sources">参考ソース</button>
+          </aside>
+          <section class="settings-content">
+            <article class="panel settings-section active" data-settings-section="profile">
+              <div class="settings-heading"><div><p class="eyebrow">PROFILE</p><h2>プロフィール</h2><p>ホームやAIアドバイスに使用する基本情報です。</p></div></div>
+              <div class="profile-settings-grid">
+                <label class="settings-field">ユーザーネーム<input id="settingsUsername" type="text" value="User" maxlength="30"></label>
+                <label class="settings-field">生年月日<input id="settingsBirthday" type="date"></label>
+              </div>
+              <div class="settings-heading big3-settings-heading"><div><p class="eyebrow">STARTING STRENGTH</p><h2>BIG3の最大重量</h2><p>開始時点の実測1RMです。今後はトレーニング記録から自動更新されます。</p></div></div>
+              <div class="big3-settings-grid">
+                <label class="settings-field">ベンチプレス<input id="settingsBenchMax" type="number" min="1" step="0.5"><span>kg</span></label>
+                <label class="settings-field">スクワット<input id="settingsSquatMax" type="number" min="1" step="0.5"><span>kg</span></label>
+                <label class="settings-field">デッドリフト<input id="settingsDeadliftMax" type="number" min="1" step="0.5"><span>kg</span></label>
+              </div>
+              <button class="settings-save-button" id="saveProfileSettings" type="button">プロフィールを保存</button>
+              <div class="settings-heading account-settings-heading"><div><p class="eyebrow">ACCOUNT SECURITY</p><h2>ID・パスワード</h2><p>パスワードの現在値は安全上表示できません。現在のパスワードで本人確認して変更します。</p></div></div>
+              <div class="account-settings-grid">
+                <section>
+                  <label class="settings-field">現在のID<input id="settingsLoginId" type="text" maxlength="64"></label>
+                  <label class="settings-field">確認用パスワード<span class="password-field"><input id="loginIdCurrentPassword" type="password" autocomplete="current-password"><button type="button" data-toggle-password>表示</button></span></label>
+                  <button class="settings-save-button secondary" id="saveLoginId" type="button">IDを変更</button>
+                </section>
+                <section>
+                  <label class="settings-field">現在のパスワード<span class="password-field"><input id="currentPassword" type="password" autocomplete="current-password"><button type="button" data-toggle-password>表示</button></span></label>
+                  <label class="settings-field">新しいパスワード<span class="password-field"><input id="newPassword" type="password" minlength="8" autocomplete="new-password"><button type="button" data-toggle-password>表示</button></span></label>
+                  <label class="settings-field">新しいパスワード確認<span class="password-field"><input id="newPasswordConfirm" type="password" minlength="8" autocomplete="new-password"><button type="button" data-toggle-password>表示</button></span></label>
+                  <button class="settings-save-button secondary" id="savePassword" type="button">パスワードを変更</button>
+                </section>
+              </div>
+              <button class="settings-logout-button" id="logoutButton" type="button">ログアウト</button>
+            </article>
+
+            <article class="panel settings-section" data-settings-section="exercises">
+              <div class="settings-heading">
+                <div>
+                  <p class="eyebrow">EXERCISE LIBRARY</p>
+                  <h2>トレーニング種目の編集</h2>
+                  <p>種目名の変更や、別の部位への移動ができます。変更内容は記録画面の候補へ反映されます。</p>
+                </div>
+              </div>
+              <div class="exercise-settings-toolbar">
+                <label>表示する部位
+                  <select id="exerciseSettingsFilter">
+                    <option value="all">すべて</option>
+                    <option value="胸">胸</option>
+                    <option value="背中">背中</option>
+                    <option value="脚">脚</option>
+                    <option value="腕">腕</option>
+                    <option value="肩">肩</option>
+                    <option value="腹筋">腹筋</option>
+                    <option value="尻">尻</option>
+                    <option value="全身運動">全身運動</option>
+                    <option value="有酸素運動">有酸素運動</option>
+                  </select>
+                </label>
+                <span id="exerciseSettingsCount"></span>
+              </div>
+              <div class="exercise-settings-list" id="exerciseSettingsList"></div>
+            </article>
+
+            <article class="panel settings-section" data-settings-section="analysis">
+              <div class="settings-heading"><div><p class="eyebrow">ANALYSIS PROFILE</p><h2>動画解析の目的</h2></div></div>
+              <a class="chatgpt-project-source" href="https://chatgpt.com/g/g-p-6a1a91a3cfd08191bc1091980c9eafa9-hawarihuteinkuqiang-hua-hurokuramu/project" target="_blank" rel="noreferrer"><span>ChatGPT PROJECT</span><strong>パワーリフティング強化プログラム</strong><small>評価・アドバイス形式の参考プロジェクト ↗</small></a>
+              <label class="settings-field">標準プロファイル<select id="defaultAnalysisProfile"><option value="general">一般トレーニー</option><option value="bodybuilding">ボディビルダー・フィジーカー</option><option value="powerlifting">パワーリフター</option><option value="athlete">アスリート</option></select></label>
+              <div class="profile-description" id="profileDescription"></div>
+              <div class="settings-row"><div><strong>過去の動画と比較する</strong><small>同じ種目の変化を時系列で評価</small></div><label class="switch"><input type="checkbox" id="compareVideos" checked><span></span></label></div>
+              <div class="settings-row"><div><strong>痛みの記録を解析へ反映</strong><small>違和感のある部位を考慮して注意を表示</small></div><label class="switch"><input type="checkbox" id="usePainData" checked><span></span></label></div>
+            </article>
+
+            <article class="panel settings-section" data-settings-section="menuApply">
+              <div class="settings-heading"><div><p class="eyebrow">PROGRAM SYNC</p><h2>メニューへの反映</h2></div></div>
+              <div class="settings-row featured-setting"><div><strong>AI評価をトレーニングメニューへ自動反映</strong><small>ONにすると動画解析後の提案を確認なしで反映します</small></div><label class="switch"><input type="checkbox" id="autoApplyToggle"><span></span></label></div>
+              <div class="apply-mode-options">
+                <label><input type="radio" name="applyMode" value="auto"><span><strong>自動反映</strong><small>解析後、AI提案をメニューへすぐ反映</small></span></label>
+                <label><input type="radio" name="applyMode" value="manual" checked><span><strong>手動反映</strong><small>内容を確認してからユーザーが決定</small></span></label>
+              </div>
+              <div class="settings-row"><div><strong>手動反映を有効にする</strong><small>OFFの場合、解析結果のみ保存します</small></div><label class="switch"><input type="checkbox" id="manualApplyEnabled" checked><span></span></label></div>
+              <div class="settings-row"><div><strong>解析ごとに反映するか質問</strong><small>毎回、確認パネルを表示します</small></div><label class="switch"><input type="checkbox" id="askEveryAnalysis" checked><span></span></label></div>
+            </article>
+
+            <article class="panel settings-section" data-settings-section="notifications">
+              <div class="settings-heading"><div><p class="eyebrow">NOTIFICATIONS</p><h2>通知</h2></div></div>
+              <div class="settings-row featured-setting"><div><strong>通知を有効にする</strong><small>アプリからのすべての通知をON/OFF</small></div><label class="switch"><input type="checkbox" id="notificationMaster" checked><span></span></label></div>
+              <div class="settings-row notification-child"><div><strong>動画解析の完了</strong><small>解析とアドバイスの準備ができた時</small></div><label class="switch"><input type="checkbox" id="notifyAnalysis" checked><span></span></label></div>
+              <div class="settings-row notification-child"><div><strong>メニュー変更</strong><small>AIが重量・回数・種目を変更した時</small></div><label class="switch"><input type="checkbox" id="notifyMenu" checked><span></span></label></div>
+              <div class="settings-row notification-child"><div><strong>フォーム注意</strong><small>痛みやリスクにつながる可能性を検出した時</small></div><label class="switch"><input type="checkbox" id="notifyForm" checked><span></span></label></div>
+            </article>
+
+            <article class="panel settings-section" data-settings-section="sources">
+              <div class="settings-heading"><div><p class="eyebrow">REFERENCE SOURCES</p><h2>参考YouTubeチャンネル</h2><p>指定チャンネルを補助的な参考情報として使用します。医学的診断や競技の公式判定を代替しません。</p></div></div>
+              <div class="source-group"><strong>一般トレーニー</strong><a href="https://www.youtube.com/results?search_query=おかずもちの筋肉生活+持田教利" target="_blank" rel="noreferrer">おかずもちの筋肉生活【持田教利】 ↗</a><a href="https://www.youtube.com/results?search_query=今古賀翔+トレーニング科学" target="_blank" rel="noreferrer">今古賀翔【トレーニング科学】 ↗</a></div>
+              <div class="source-group"><strong>ボディビルダー・フィジーカー</strong><a href="https://www.youtube.com/results?search_query=新・バズーカ岡田チャンネル" target="_blank" rel="noreferrer">新・バズーカ岡田チャンネル ↗</a><a href="https://www.youtube.com/results?search_query=横川くんの筋肉チャンネル" target="_blank" rel="noreferrer">横川くんの筋肉チャンネル ↗</a><a href="https://www.youtube.com/results?search_query=テストステロン扇谷チャンネル" target="_blank" rel="noreferrer">テストステロン扇谷チャンネル ↗</a></div>
+              <div class="source-group"><strong>パワーリフター</strong><a href="https://www.youtube.com/results?search_query=パワーチューブ+パワーリフティング" target="_blank" rel="noreferrer">パワーチューブ ↗</a><a href="https://www.youtube.com/results?search_query=ベンチプレス400キロ男+藤本竜希" target="_blank" rel="noreferrer">ベンチプレス400キロ男【藤本竜希】 ↗</a><a class="official-rule-source" href="https://www.powerlifting.sport/rules/codes/info/technical-rules" target="_blank" rel="noreferrer"><span>公式競技規則</span>IPF Technical Rule Book（2026年3月1日施行） ↗</a></div>
+              <div class="source-group"><strong>アスリート</strong><a href="https://www.youtube.com/results?search_query=アスリートの為のトレーニング+栄養+ケガ+コンディショニング" target="_blank" rel="noreferrer">アスリートの為のトレーニング、栄養、ケガ、コンディショニング ↗</a><a href="https://www.youtube.com/results?search_query=栗原嵩+トレーニング" target="_blank" rel="noreferrer">栗原嵩 ↗</a></div>
+            </article>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <nav class="mobile-bottom-nav" aria-label="モバイルナビゲーション">
+    <button class="active" data-mobile-page="dashboard"><span>⌂</span><small>ホーム</small></button>
+    <button data-mobile-page="calendar"><span>□</span><small>履歴</small></button>
+    <button class="mobile-record-button" data-mobile-action="record"><span>＋</span><small>記録</small></button>
+    <button data-mobile-page="coach"><span>✦</span><small>AI</small></button>
+    <button data-mobile-page="settings"><span>⚙</span><small>設定</small></button>
+  </nav>
+
+  <dialog id="big3SetupDialog" class="big3-setup-dialog">
+    <form method="dialog" id="big3SetupForm">
+      <div class="dialog-header">
+        <div><p class="eyebrow">INITIAL SETUP</p><h2>現在のBIG3を設定</h2></div>
+      </div>
+      <p class="big3-setup-description">トレーニング開始時点の実測1RMを入力してください。進捗の基準値として保存され、以後は記録から自動更新されます。</p>
+      <div class="big3-setup-grid">
+        <label><span>BENCH PRESS</span>ベンチプレス<input name="benchMax" type="number" min="1" step="0.5" value="90" required><b>kg</b></label>
+        <label><span>SQUAT</span>スクワット<input name="squatMax" type="number" min="1" step="0.5" value="125" required><b>kg</b></label>
+        <label><span>DEADLIFT</span>デッドリフト<input name="deadliftMax" type="number" min="1" step="0.5" value="155" required><b>kg</b></label>
+      </div>
+      <button class="start-button save-log" value="default">基準重量を保存して始める</button>
+    </form>
+  </dialog>
+
+  <dialog id="logDialog">
+    <form method="dialog" id="logForm">
+      <div class="dialog-header">
+        <div><p class="eyebrow">TRAINING LOG</p><h2>今日の記録</h2></div>
+        <button class="close-button" type="button" aria-label="閉じる">×</button>
+      </div>
+
+      <section class="log-section">
+        <div class="log-section-heading"><span>01</span><div><strong>コンディション</strong><small>体重・回復状態を記録</small></div></div>
+        <div class="form-grid">
+          <label>体重 <span>kg</span><input type="number" name="weight" value="74.2" step="0.1" min="30" max="250"></label>
+          <label>睡眠時間 <span>時間</span><input type="number" name="sleep" value="7.5" step="0.5" min="0" max="24"></label>
+        </div>
+        <fieldset>
+          <legend>疲労度</legend>
+          <div class="rating-row">
+            <input type="radio" name="fatigue" id="f1" value="1"><label for="f1">1<small>低い</small></label>
+            <input type="radio" name="fatigue" id="f2" value="2" checked><label for="f2">2</label>
+            <input type="radio" name="fatigue" id="f3" value="3"><label for="f3">3</label>
+            <input type="radio" name="fatigue" id="f4" value="4"><label for="f4">4</label>
+            <input type="radio" name="fatigue" id="f5" value="5"><label for="f5">5<small>高い</small></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>痛みのある部位 <span class="optional">複数選択可</span></legend>
+          <div class="pain-grid">
+            <label><input type="checkbox" name="pain" value="首"><span>首</span></label>
+            <label><input type="checkbox" name="pain" value="肩"><span>肩</span></label>
+            <label><input type="checkbox" name="pain" value="肘"><span>肘</span></label>
+            <label><input type="checkbox" name="pain" value="手首"><span>手首</span></label>
+            <label><input type="checkbox" name="pain" value="背中"><span>背中</span></label>
+            <label><input type="checkbox" name="pain" value="腰"><span>腰</span></label>
+            <label><input type="checkbox" name="pain" value="股関節"><span>股関節</span></label>
+            <label><input type="checkbox" name="pain" value="膝"><span>膝</span></label>
+            <label><input type="checkbox" name="pain" value="足首"><span>足首</span></label>
+            <label><input type="checkbox" name="pain" value="その他"><span>その他</span></label>
+          </div>
+          <input class="pain-detail" type="text" name="painDetail" placeholder="痛みの程度や動作をメモ（任意）">
+        </fieldset>
+      </section>
+
+      <section class="log-section">
+        <div class="log-section-heading"><span>02</span><div><strong>トレーニング内容</strong><small>部位と種目を選んでセットを記録</small></div></div>
+        <fieldset>
+          <legend>トレーニング部位 <span class="optional">複数選択可</span></legend>
+          <div class="body-part-grid" id="bodyPartGrid">
+            <button type="button" class="body-part active" data-part="胸">胸</button>
+            <button type="button" class="body-part" data-part="背中">背中</button>
+            <button type="button" class="body-part" data-part="脚">脚</button>
+            <button type="button" class="body-part" data-part="腕">腕</button>
+            <button type="button" class="body-part" data-part="肩">肩</button>
+            <button type="button" class="body-part" data-part="腹筋">腹筋</button>
+            <button type="button" class="body-part" data-part="尻">尻</button>
+            <button type="button" class="body-part" data-part="全身運動">全身</button>
+            <button type="button" class="body-part" data-part="有酸素運動">有酸素</button>
+          </div>
+        </fieldset>
+
+        <div class="exercise-builder">
+          <label class="select-label">種目
+            <select id="exerciseSelect" aria-label="種目を選択"></select>
+          </label>
+          <button class="add-exercise-button" type="button" id="addExerciseButton">＋ 種目を追加</button>
+        </div>
+        <button class="show-custom-button" type="button" id="showCustomExercise">候補にない種目を登録</button>
+        <div class="custom-exercise" id="customExercise">
+          <label><span><b>1</b> 部位を選択</span>
+            <select id="customExercisePart">
+              <option value="胸">胸</option>
+              <option value="背中">背中</option>
+              <option value="脚">脚</option>
+              <option value="腕">腕</option>
+              <option value="肩">肩</option>
+              <option value="腹筋">腹筋</option>
+              <option value="尻">尻</option>
+              <option value="全身運動">全身運動</option>
+              <option value="有酸素運動">有酸素運動</option>
+            </select>
+          </label>
+          <label><span><b>2</b> トレーニング名</span>
+            <input type="text" id="customExerciseName" placeholder="例：ペンドレイロウ">
+          </label>
+          <button type="button" id="saveCustomExercise"><b>3</b> 種目に追加・保存</button>
+        </div>
+        <div class="exercise-records" id="exerciseRecords"></div>
+      </section>
+
+      <label class="full-label">全体メモ<textarea name="memo" placeholder="今日の感覚、フォーム、次回意識することなど"></textarea></label>
+      <button class="start-button save-log" value="default">記録を保存</button>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js?v=20260615-7"></script>
+</body>
+</html>

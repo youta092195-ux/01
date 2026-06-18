@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: aimus-training
+    env: docker
+    plan: starter
+    autoDeploy: true
+    healthCheckPath: /api/v1/health
+    disk:
+      name: aimus-data
+      mountPath: /app/data
+      sizeGB: 5
+    envVars:
+      - key: FORGE_DATA_DIR
+        value: /app/data
+      - key: FORGE_SECURE_COOKIES
+        value: "true"
+      - key: FORGE_SESSION_DAYS
+        value: "180"
+      - key: FORGE_MAX_UPLOAD_MB
+        value: "300"
+      - key: FORGE_PUBLIC_BASE_URL
+        value: https://replace-with-your-domain.example.com
+      - key: FORGE_ALLOWED_ORIGINS
+        value: https://replace-with-your-domain.example.com
