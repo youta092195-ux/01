@@ -2,10 +2,14 @@ services:
   - type: web
     name: aimus-training
     env: docker
-    plan: free
+    plan: starter
     region: singapore
     autoDeploy: true
     healthCheckPath: /api/v1/health
+    disk:
+      name: aimus-data
+      mountPath: /app/data
+      sizeGB: 5
     envVars:
       - key: FORGE_DATA_DIR
         value: /app/data

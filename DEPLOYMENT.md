@@ -40,6 +40,15 @@ FORGE_SECURE_COOKIES=true
 7. 再デプロイします。
 8. `https://あなたのRender URL/api/v1/health` が `ok` を返せば公開成功です。
 
+## 現在の公開環境
+
+- GitHub: `https://github.com/youta092195-ux/01`
+- Render: `https://aimus-training.onrender.com/`
+- 現在の `render.yaml`: 無料検証用。スリープあり、永続ディスクなし。
+- `render.always-on.yaml`: 常時稼働・5GB永続ディスク用の有料構成。
+
+2026年6月18日時点のRender公式価格では、Starter Web Serviceは月7ドル、永続ディスクは1GBあたり月0.25ドルです。5GB構成は合計約8.25ドル/月からです。
+
 ## 重要な注意
 
 - Renderの無料枠はスリープする場合があります。PCスリープ対策として使うなら、有料プランまたは常時稼働設定が必要です。
