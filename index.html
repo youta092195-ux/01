@@ -8,12 +8,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20260618-1">
+  <link rel="icon" type="image/png" href="app-icon.png?v=20260619-1">
+  <link rel="apple-touch-icon" href="app-icon.png?v=20260619-1">
+  <link rel="stylesheet" href="styles.css?v=20260619-1">
 </head>
 <body class="auth-loading">
   <section class="auth-gate" id="authGate" aria-live="polite">
     <div class="auth-brand-panel">
-      <a class="brand auth-brand" href="#" aria-label="AI×MUS"><span class="brand-mark">A</span><span>AI×MUS</span></a>
+      <a class="brand auth-brand" href="#" aria-label="AI×MUS"><span class="brand-mark"><img src="app-icon.png?v=20260619-1" alt=""></span><span>AI×MUS</span></a>
       <div>
         <p class="eyebrow">YOUR PERSONAL TRAINING SYSTEM</p>
         <h1>記録を、次の強さへ。</h1>
@@ -40,7 +42,6 @@
           <button class="auth-submit" type="submit">ログイン</button>
           <small class="auth-session-note">ログアウトするまで、この端末ではログイン状態が維持されます。</small>
           <button class="forgot-password-button" type="button" id="openForgotPassword">パスワードを忘れた方</button>
-          <a class="creator-entry-link" href="creator.html">製作者向けページを開く →</a>
         </form>
 
         <form class="auth-form" id="registerForm" novalidate>
@@ -87,6 +88,7 @@
             <button class="auth-submit" id="completeRegistration" type="button">設定を保存してホームへ</button>
           </section>
           <p class="auth-error" id="registerError"></p>
+          <button class="auth-back-button" type="button" id="backToLogin">← ログイン画面に戻る</button>
         </form>
 
         <form class="auth-form" id="forgotPasswordForm">
@@ -111,7 +113,7 @@
   <div class="app-shell">
     <aside class="sidebar">
       <a class="brand" href="#" aria-label="AI×MUS ホーム">
-        <span class="brand-mark">A</span>
+        <span class="brand-mark"><img src="app-icon.png?v=20260619-1" alt=""></span>
         <span>AI×MUS</span>
       </a>
 
@@ -747,6 +749,7 @@
         <div class="settings-layout">
           <aside class="settings-nav">
             <button class="active" data-settings-target="profile">プロフィール</button>
+            <button data-settings-target="password">パスワード変更</button>
             <button data-settings-target="exercises">トレーニング種目</button>
             <button data-settings-target="analysis">AI解析</button>
             <button data-settings-target="menuApply">メニュー反映</button>
@@ -767,21 +770,27 @@
                 <label class="settings-field">デッドリフト<input id="settingsDeadliftMax" type="number" min="1" step="0.5"><span>kg</span></label>
               </div>
               <button class="settings-save-button" id="saveProfileSettings" type="button">プロフィールを保存</button>
-              <div class="settings-heading account-settings-heading"><div><p class="eyebrow">ACCOUNT SECURITY</p><h2>ID・パスワード</h2><p>パスワードの現在値は安全上表示できません。現在のパスワードで本人確認して変更します。</p></div></div>
+              <div class="settings-heading account-settings-heading"><div><p class="eyebrow">ACCOUNT</p><h2>ログインID</h2><p>現在のパスワードで本人確認してIDを変更します。</p></div></div>
               <div class="account-settings-grid">
                 <section>
                   <label class="settings-field">現在のID<input id="settingsLoginId" type="text" maxlength="64"></label>
                   <label class="settings-field">確認用パスワード<span class="password-field"><input id="loginIdCurrentPassword" type="password" autocomplete="current-password"><button type="button" data-toggle-password>表示</button></span></label>
                   <button class="settings-save-button secondary" id="saveLoginId" type="button">IDを変更</button>
                 </section>
-                <section>
-                  <label class="settings-field">現在のパスワード<span class="password-field"><input id="currentPassword" type="password" autocomplete="current-password"><button type="button" data-toggle-password>表示</button></span></label>
-                  <label class="settings-field">新しいパスワード<span class="password-field"><input id="newPassword" type="password" minlength="8" autocomplete="new-password"><button type="button" data-toggle-password>表示</button></span></label>
-                  <label class="settings-field">新しいパスワード確認<span class="password-field"><input id="newPasswordConfirm" type="password" minlength="8" autocomplete="new-password"><button type="button" data-toggle-password>表示</button></span></label>
-                  <button class="settings-save-button secondary" id="savePassword" type="button">パスワードを変更</button>
-                </section>
               </div>
               <button class="settings-logout-button" id="logoutButton" type="button">ログアウト</button>
+            </article>
+
+            <article class="panel settings-section" data-settings-section="password">
+              <div class="settings-heading">
+                <div><p class="eyebrow">ACCOUNT SECURITY</p><h2>パスワード変更</h2><p>現在のパスワードで本人確認します。変更後は、新しいパスワードで再ログインしてください。</p></div>
+              </div>
+              <div class="password-settings-form">
+                <label class="settings-field">現在のパスワード<span class="password-field"><input id="currentPassword" type="password" autocomplete="current-password"><button type="button" data-toggle-password>表示</button></span></label>
+                <label class="settings-field">新しいパスワード<span class="password-field"><input id="newPassword" type="password" minlength="8" autocomplete="new-password"><button type="button" data-toggle-password>表示</button></span></label>
+                <label class="settings-field">新しいパスワード確認<span class="password-field"><input id="newPasswordConfirm" type="password" minlength="8" autocomplete="new-password"><button type="button" data-toggle-password>表示</button></span></label>
+                <button class="settings-save-button secondary" id="savePassword" type="button">パスワードを変更</button>
+              </div>
             </article>
 
             <article class="panel settings-section" data-settings-section="exercises">
@@ -968,7 +977,20 @@
     </form>
   </dialog>
 
+  <dialog id="recordCompleteDialog" class="record-complete-dialog">
+    <div class="record-complete-content">
+      <span class="record-complete-icon">✓</span>
+      <p class="eyebrow">TRAINING SAVED</p>
+      <h2>記録しました</h2>
+      <p>今日のトレーニング内容を保存しました。</p>
+      <div class="record-complete-actions">
+        <button class="start-button" id="returnHomeAfterRecord" type="button">ホームに戻る</button>
+        <button class="secondary-dialog-button" id="closeRecordComplete" type="button">このまま閉じる</button>
+      </div>
+    </div>
+  </dialog>
+
   <div class="toast" id="toast" role="status"></div>
-  <script src="app.js?v=20260618-3"></script>
+  <script src="app.js?v=20260619-1"></script>
 </body>
 </html>

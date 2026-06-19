@@ -346,6 +346,15 @@ def web_app_styles() -> FileResponse:
     )
 
 
+@app.get("/app-icon.png", include_in_schema=False)
+def web_app_icon() -> FileResponse:
+    return FileResponse(
+        frontend_dir / "app-icon.png",
+        media_type="image/png",
+        headers=frontend_headers,
+    )
+
+
 @app.get("/creator.html", include_in_schema=False)
 def creator_portal(request: Request) -> FileResponse:
     host = request.headers.get("host", "").split(":", 1)[0].lower()

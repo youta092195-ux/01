@@ -20,6 +20,7 @@ const loginForm = document.querySelector("#loginForm");
 const registerForm = document.querySelector("#registerForm");
 const forgotPasswordForm = document.querySelector("#forgotPasswordForm");
 const resetPasswordForm = document.querySelector("#resetPasswordForm");
+const recordCompleteDialog = document.querySelector("#recordCompleteDialog");
 const isLocalAppHost = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
 const savedApiBase = isLocalAppHost ? localStorage.getItem("forgeApiBaseUrl") : null;
 const ANALYSIS_API_BASE = window.FORGE_API_BASE_URL
@@ -1524,6 +1525,10 @@ document.querySelector("#openForgotPassword").addEventListener("click", () => {
   setAuthMode("forgot");
 });
 
+document.querySelector("#backToLogin").addEventListener("click", () => {
+  setAuthMode("login");
+});
+
 document.querySelectorAll("[data-next-registration]").forEach((button) => {
   button.addEventListener("click", () => {
     const nextStep = Number(button.dataset.nextRegistration);
@@ -1809,6 +1814,7 @@ logForm.addEventListener("submit", (event) => {
     renderHomeStartState();
   }
   logDialog.close();
+  recordCompleteDialog.showModal();
   const painMessage = painParts.length ? `、痛み: ${painParts.join("・")}` : "";
   const performanceMessage = updatedExercises.length ? `、${updatedExercises.length}種目の進捗を更新` : "";
   showToast(`体重 ${weight}kg、${exerciseCount}種目を記録しました${performanceMessage}${painMessage}。`);
@@ -1975,6 +1981,15 @@ function openPage(pageName) {
   sidebar.classList.remove("open");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
+
+document.querySelector("#returnHomeAfterRecord").addEventListener("click", () => {
+  recordCompleteDialog.close();
+  openPage("dashboard");
+});
+
+document.querySelector("#closeRecordComplete").addEventListener("click", () => {
+  recordCompleteDialog.close();
+});
 
 document.querySelectorAll(".nav-item").forEach((item) => {
   item.addEventListener("click", () => {
