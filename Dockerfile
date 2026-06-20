@@ -17,7 +17,7 @@ RUN apt-get update \
 COPY backend/requirements.txt /app/backend/requirements.txt
 RUN pip install --no-cache-dir -r /app/backend/requirements.txt
 
-COPY index.html app.js styles.css creator.html app-icon.png /app/
+COPY index.html app.js styles.css creator.html admin.html admin.js admin.css app-icon.png /app/
 COPY backend /app/backend
 
 WORKDIR /app/backend

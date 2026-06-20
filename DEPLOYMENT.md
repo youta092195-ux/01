@@ -64,7 +64,9 @@ FORGE_DATA_DIR=/app/data
 FORGE_SECURE_COOKIES=true
 FORGE_PUBLIC_BASE_URL=https://あなたの公開URL
 FORGE_ALLOWED_ORIGINS=https://あなたの公開URL
-FORGE_SESSION_DAYS=180
+FORGE_SESSION_DAYS=30
+FORGE_ADMIN_LOGIN_IDS=管理者にするログインID
+FORGE_EXPORT_USER_REGISTRY=false
 FORGE_MAX_UPLOAD_MB=300
 FORGE_SMTP_HOST=
 FORGE_SMTP_PORT=587
@@ -73,6 +75,17 @@ FORGE_SMTP_PASSWORD=
 FORGE_SMTP_FROM=
 FORGE_SMTP_USE_TLS=true
 ```
+
+## 管理者サイト
+
+- URL: `https://あなたの公開URL/admin.html`
+- `FORGE_ADMIN_LOGIN_IDS` に管理者として使う既存ログインIDを指定します。複数の場合はカンマ区切りです。
+- 指定後、そのIDで利用者サイトへログインしてから管理者URLを開きます。
+- 未認証または一般ユーザーからは404になります。
+- 管理画面ではユーザー検索、停止・再開、権限変更、全セッション失効、監査ログ確認ができます。
+- パスワード、パスワードハッシュ、身体情報は管理画面に表示しません。
+
+一般公開では `FORGE_EXPORT_USER_REGISTRY=false` を維持してください。ユーザー情報をCSVへ重複保存しない設定です。
 
 ## ローカル確認
 

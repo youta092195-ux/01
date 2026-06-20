@@ -52,8 +52,9 @@ def _token_hash(token: str) -> str:
 
 
 class AuthRepository:
-    def __init__(self, database_path: Path) -> None:
+    def __init__(self, database_path: Path, export_user_registry: bool = True) -> None:
         self.database_path = database_path
+        self.export_user_registry = export_user_registry
         self._lock = Lock()
         self._initialize()
 
@@ -114,6 +115,17 @@ class AuthRepository:
                     created_at TEXT NOT NULL,
                     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
                 );
+
+                CREATE TABLE IF NOT EXISTS admin_audit_logs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    actor_user_id TEXT,
+                    actor_login_id TEXT,
+                    action TEXT NOT NULL,
+                    target_user_id TEXT,
+                    detail TEXT,
+                    ip_address TEXT,
+                    created_at TEXT NOT NULL
+                );
                 """
             )
             columns = {
@@ -126,6 +138,9 @@ class AuthRepository:
                 "target_weight_kg": "REAL",
                 "goal_text": "TEXT",
                 "birth_date": "TEXT",
+                "role": "TEXT NOT NULL DEFAULT 'user'",
+                "is_active": "INTEGER NOT NULL DEFAULT 1",
+                "last_login_at": "TEXT",
             }
             for name, column_type in additions.items():
                 if name not in columns:
@@ -150,7 +165,10 @@ class AuthRepository:
         user = dict(row)
         user.pop("password_hash", None)
         user.pop("updated_at", None)
-        user["notifications"] = bool(user["notifications"])
+        if "notifications" in user:
+            user["notifications"] = bool(user["notifications"])
+        user["is_active"] = bool(user.get("is_active", 1))
+        user["role"] = user.get("role") or "user"
         return user
 
     def create_user(self, registration: UserRegistration) -> dict[str, Any]:
@@ -195,7 +213,8 @@ class AuthRepository:
                 message = "このIDまたはメールアドレスはすでに使用されています。"
                 raise ValueError(message) from error
         user = self.get_user(user_id)
-        self._append_user_registry(user)
+        if self.export_user_registry:
+            self._append_user_registry(user)
         return user
 
     def _append_user_registry(self, user: dict[str, Any]) -> None:
@@ -240,8 +259,17 @@ class AuthRepository:
                 "SELECT * FROM users WHERE login_id = ? COLLATE NOCASE",
                 (login_id.strip(),),
             ).fetchone()
-        if row is None or not _verify_password(password, row["password_hash"]):
+        if (
+            row is None
+            or not bool(row["is_active"])
+            or not _verify_password(password, row["password_hash"])
+        ):
             return None
+        with self._lock, self._connect() as connection:
+            connection.execute(
+                "UPDATE users SET last_login_at = ? WHERE id = ?",
+                (utc_now(), row["id"]),
+            )
         return self._public_user(row)
 
     def update_profile(
@@ -340,11 +368,144 @@ class AuthRepository:
                 SELECT users.*
                 FROM user_sessions
                 JOIN users ON users.id = user_sessions.user_id
-                WHERE user_sessions.token_hash = ? AND user_sessions.expires_at > ?
+                WHERE user_sessions.token_hash = ?
+                  AND user_sessions.expires_at > ?
+                  AND users.is_active = 1
                 """,
                 (_token_hash(token), now),
             ).fetchone()
         return self._public_user(row) if row else None
+
+    def promote_configured_admins(self, login_ids: list[str]) -> None:
+        if not login_ids:
+            return
+        placeholders = ",".join("?" for _ in login_ids)
+        with self._lock, self._connect() as connection:
+            connection.execute(
+                f"""
+                UPDATE users SET role = 'admin', updated_at = ?
+                WHERE lower(login_id) IN ({placeholders})
+                """,
+                (utc_now(), *login_ids),
+            )
+
+    def list_users(self, query: str = "", limit: int = 200) -> list[dict[str, Any]]:
+        query = query.strip()
+        parameters: list[Any] = []
+        where = ""
+        if query:
+            where = """
+                WHERE login_id LIKE ? COLLATE NOCASE
+                   OR email LIKE ? COLLATE NOCASE
+                   OR username LIKE ? COLLATE NOCASE
+                   OR member_number LIKE ? COLLATE NOCASE
+            """
+            pattern = f"%{query}%"
+            parameters.extend([pattern, pattern, pattern, pattern])
+        parameters.append(max(1, min(limit, 500)))
+        with self._connect() as connection:
+            rows = connection.execute(
+                f"""
+                SELECT id, member_number, login_id, email, username, role,
+                       is_active, created_at, last_login_at
+                FROM users
+                {where}
+                ORDER BY created_at DESC
+                LIMIT ?
+                """,
+                parameters,
+            ).fetchall()
+        return [self._public_user(row) for row in rows]
+
+    def admin_stats(self) -> dict[str, int]:
+        with self._connect() as connection:
+            user_stats = connection.execute(
+                """
+                SELECT COUNT(*) AS users,
+                       SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) AS active_users,
+                       SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) AS admins
+                FROM users
+                """
+            ).fetchone()
+            sessions = connection.execute(
+                "SELECT COUNT(*) FROM user_sessions WHERE expires_at > ?",
+                (datetime.now(timezone.utc).isoformat(),),
+            ).fetchone()[0]
+            try:
+                analyses = connection.execute("SELECT COUNT(*) FROM analysis_jobs").fetchone()[0]
+            except sqlite3.OperationalError:
+                analyses = 0
+        return {
+            "users": int(user_stats["users"] or 0),
+            "active_users": int(user_stats["active_users"] or 0),
+            "admins": int(user_stats["admins"] or 0),
+            "sessions": int(sessions),
+            "analyses": int(analyses),
+        }
+
+    def set_user_active(self, user_id: str, is_active: bool) -> dict[str, Any] | None:
+        with self._lock, self._connect() as connection:
+            connection.execute(
+                "UPDATE users SET is_active = ?, updated_at = ? WHERE id = ?",
+                (int(is_active), utc_now(), user_id),
+            )
+            if not is_active:
+                connection.execute("DELETE FROM user_sessions WHERE user_id = ?", (user_id,))
+        return self.get_user(user_id)
+
+    def set_user_role(self, user_id: str, role: str) -> dict[str, Any] | None:
+        if role not in {"user", "admin"}:
+            raise ValueError("Invalid role")
+        with self._lock, self._connect() as connection:
+            connection.execute(
+                "UPDATE users SET role = ?, updated_at = ? WHERE id = ?",
+                (role, utc_now(), user_id),
+            )
+            connection.execute("DELETE FROM user_sessions WHERE user_id = ?", (user_id,))
+        return self.get_user(user_id)
+
+    def revoke_user_sessions(self, user_id: str) -> None:
+        with self._lock, self._connect() as connection:
+            connection.execute("DELETE FROM user_sessions WHERE user_id = ?", (user_id,))
+
+    def write_audit_log(
+        self,
+        actor: dict[str, Any] | None,
+        action: str,
+        target_user_id: str | None = None,
+        detail: str | None = None,
+        ip_address: str | None = None,
+    ) -> None:
+        with self._lock, self._connect() as connection:
+            connection.execute(
+                """
+                INSERT INTO admin_audit_logs (
+                    actor_user_id, actor_login_id, action, target_user_id,
+                    detail, ip_address, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    actor.get("id") if actor else None,
+                    actor.get("login_id") if actor else None,
+                    action,
+                    target_user_id,
+                    detail,
+                    ip_address,
+                    utc_now(),
+                ),
+            )
+
+    def list_audit_logs(self, limit: int = 100) -> list[dict[str, Any]]:
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT * FROM admin_audit_logs
+                ORDER BY id DESC
+                LIMIT ?
+                """,
+                (max(1, min(limit, 500)),),
+            ).fetchall()
+        return [dict(row) for row in rows]
 
     def delete_session(self, token: str) -> None:
         with self._lock, self._connect() as connection:

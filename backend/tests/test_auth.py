@@ -99,3 +99,28 @@ class AuthRepositoryTest(TestCase):
         self.assertIsNotNone(
             self.repository.authenticate("updated_user", "ChangedAgain123!")
         )
+
+    def test_admin_role_account_status_and_audit_log(self) -> None:
+        user = self.repository.create_user(self.registration)
+        self.repository.promote_configured_admins(["test_user"])
+        admin = self.repository.get_user(user["id"])
+        self.assertEqual(admin["role"], "admin")
+
+        token = self.repository.create_session(user["id"], days=1)
+        self.assertIsNotNone(self.repository.user_from_session(token))
+        disabled = self.repository.set_user_active(user["id"], False)
+        self.assertFalse(disabled["is_active"])
+        self.assertIsNone(self.repository.user_from_session(token))
+        self.assertIsNone(self.repository.authenticate("test_user", "StrongPass123!"))
+
+        enabled = self.repository.set_user_active(user["id"], True)
+        self.assertTrue(enabled["is_active"])
+        self.repository.write_audit_log(
+            enabled,
+            "user_enabled",
+            target_user_id=user["id"],
+            ip_address="127.0.0.1",
+        )
+        logs = self.repository.list_audit_logs()
+        self.assertEqual(logs[0]["action"], "user_enabled")
+        self.assertEqual(self.repository.admin_stats()["admins"], 1)

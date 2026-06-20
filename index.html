@@ -51,8 +51,8 @@
             <div class="auth-field-grid">
               <label>ID<input name="login_id" type="text" autocomplete="username" minlength="3" maxlength="64" placeholder="3文字以上・空白不可" required></label>
               <label>メールアドレス<input name="email" type="email" autocomplete="email" placeholder="パスワード再設定に使用" required></label>
-              <label>パスワード<span class="password-field"><input name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="8文字以上" required><button type="button" data-toggle-password>表示</button></span></label>
-              <label>パスワード確認<span class="password-field"><input name="password_confirm" type="password" autocomplete="new-password" minlength="8" maxlength="128" required><button type="button" data-toggle-password>表示</button></span></label>
+              <label>パスワード<span class="password-field"><input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="12文字以上・英大文字/小文字/数字" required><button type="button" data-toggle-password>表示</button></span></label>
+              <label>パスワード確認<span class="password-field"><input name="password_confirm" type="password" autocomplete="new-password" minlength="12" maxlength="128" required><button type="button" data-toggle-password>表示</button></span></label>
             </div>
             <div class="registration-security-note"><strong>IDを忘れた場合</strong><p>メールアドレスで本人確認できる設計にします。自動発行される会員番号はユーザー管理用で、通常のログインには使いません。</p></div>
             <button class="auth-submit registration-next" type="button" data-next-registration="2">次へ</button>
@@ -100,9 +100,9 @@
         </form>
 
         <form class="auth-form" id="resetPasswordForm">
-          <div class="auth-heading"><p class="eyebrow">NEW PASSWORD</p><h2>新しいパスワード</h2><p>8文字以上で設定してください。</p></div>
-          <label>新しいパスワード<span class="password-field"><input name="password" type="password" minlength="8" maxlength="128" required><button type="button" data-toggle-password>表示</button></span></label>
-          <label>パスワード確認<span class="password-field"><input name="password_confirm" type="password" minlength="8" maxlength="128" required><button type="button" data-toggle-password>表示</button></span></label>
+          <div class="auth-heading"><p class="eyebrow">NEW PASSWORD</p><h2>新しいパスワード</h2><p>英大文字・英小文字・数字を含む12文字以上で設定してください。</p></div>
+          <label>新しいパスワード<span class="password-field"><input name="password" type="password" minlength="12" maxlength="128" required><button type="button" data-toggle-password>表示</button></span></label>
+          <label>パスワード確認<span class="password-field"><input name="password_confirm" type="password" minlength="12" maxlength="128" required><button type="button" data-toggle-password>表示</button></span></label>
           <p class="auth-error" id="resetPasswordMessage"></p>
           <button class="auth-submit" type="submit">パスワードを変更</button>
         </form>
@@ -778,8 +778,8 @@
               </div>
               <div class="password-settings-form">
                 <label class="settings-field">現在のパスワード<span class="password-field"><input id="currentPassword" type="password" autocomplete="current-password"><button type="button" data-toggle-password>表示</button></span></label>
-                <label class="settings-field">新しいパスワード<span class="password-field"><input id="newPassword" type="password" minlength="8" autocomplete="new-password"><button type="button" data-toggle-password>表示</button></span></label>
-                <label class="settings-field">新しいパスワード確認<span class="password-field"><input id="newPasswordConfirm" type="password" minlength="8" autocomplete="new-password"><button type="button" data-toggle-password>表示</button></span></label>
+                <label class="settings-field">新しいパスワード<span class="password-field"><input id="newPassword" type="password" minlength="12" autocomplete="new-password"><button type="button" data-toggle-password>表示</button></span></label>
+                <label class="settings-field">新しいパスワード確認<span class="password-field"><input id="newPasswordConfirm" type="password" minlength="12" autocomplete="new-password"><button type="button" data-toggle-password>表示</button></span></label>
                 <button class="settings-save-button secondary" id="savePassword" type="button">パスワードを変更</button>
               </div>
             </article>
@@ -999,6 +999,6 @@
   </dialog>
 
   <div class="toast" id="toast" role="status"></div>
-  <script src="app.js?v=20260620-2"></script>
+  <script src="app.js?v=20260620-3"></script>
 </body>
 </html>

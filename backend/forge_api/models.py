@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from enum import Enum
 from datetime import date
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -20,10 +20,22 @@ class TrainingProfile(str, Enum):
     athlete = "athlete"
 
 
+def validate_password_strength(value: str) -> str:
+    if len(value) < 12:
+        raise ValueError("パスワードは12文字以上で入力してください。")
+    if not any(character.islower() for character in value):
+        raise ValueError("パスワードに英小文字を含めてください。")
+    if not any(character.isupper() for character in value):
+        raise ValueError("パスワードに英大文字を含めてください。")
+    if not any(character.isdigit() for character in value):
+        raise ValueError("パスワードに数字を含めてください。")
+    return value
+
+
 class UserRegistration(BaseModel):
     login_id: str = Field(min_length=3, max_length=64)
     email: str = Field(min_length=5, max_length=254)
-    password: str = Field(min_length=8, max_length=128)
+    password: str = Field(min_length=12, max_length=128)
     username: str = Field(min_length=1, max_length=30)
     birth_date: date
     weight_kg: float = Field(gt=20, le=400)
@@ -58,6 +70,11 @@ class UserRegistration(BaseModel):
             raise ValueError("有効なメールアドレスを入力してください。")
         return value
 
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, value: str) -> str:
+        return validate_password_strength(value)
+
 
 class UserLogin(BaseModel):
     login_id: str
@@ -75,7 +92,12 @@ class PasswordResetRequest(BaseModel):
 
 class PasswordResetConfirm(BaseModel):
     token: str = Field(min_length=32, max_length=256)
-    password: str = Field(min_length=8, max_length=128)
+    password: str = Field(min_length=12, max_length=128)
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, value: str) -> str:
+        return validate_password_strength(value)
 
 
 class UserProfileUpdate(BaseModel):
@@ -95,7 +117,12 @@ class LoginIdUpdate(BaseModel):
 
 class PasswordUpdate(BaseModel):
     current_password: str = Field(min_length=8, max_length=128)
-    new_password: str = Field(min_length=8, max_length=128)
+    new_password: str = Field(min_length=12, max_length=128)
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_password(cls, value: str) -> str:
+        return validate_password_strength(value)
 
 
 class UserResponse(BaseModel):
@@ -113,6 +140,47 @@ class UserResponse(BaseModel):
     deadlift_max: float | None = None
     target_weight_kg: float | None = None
     goal_text: str | None = None
+    created_at: str
+    role: str = "user"
+    is_active: bool = True
+
+
+class AdminUserResponse(BaseModel):
+    id: str
+    member_number: str | None = None
+    login_id: str
+    email: str | None = None
+    username: str
+    role: str
+    is_active: bool
+    created_at: str
+    last_login_at: str | None = None
+
+
+class AdminUserStatusUpdate(BaseModel):
+    is_active: bool
+
+
+class AdminUserRoleUpdate(BaseModel):
+    role: Literal["user", "admin"]
+
+
+class AdminStatsResponse(BaseModel):
+    users: int
+    active_users: int
+    admins: int
+    sessions: int
+    analyses: int
+
+
+class AdminAuditResponse(BaseModel):
+    id: int
+    actor_user_id: str | None = None
+    actor_login_id: str | None = None
+    action: str
+    target_user_id: str | None = None
+    detail: str | None = None
+    ip_address: str | None = None
     created_at: str
 
 

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#11130f">
+  <title>AI×MUS 管理者サイト</title>
+  <link rel="icon" type="image/png" href="app-icon.png">
+  <link rel="stylesheet" href="styles.css?v=20260620-1">
+  <link rel="stylesheet" href="admin.css?v=20260620-1">
+</head>
+<body class="admin-body">
+  <main class="admin-shell">
+    <header class="admin-header">
+      <a class="brand" href="/"><span class="brand-mark"><img src="app-icon.png" alt=""></span><span>AI×MUS</span></a>
+      <div><span>ADMIN CONSOLE</span><a href="/">利用者サイトへ戻る</a></div>
+    </header>
+
+    <section class="admin-hero">
+      <div><p class="eyebrow">SECURE OPERATIONS</p><h1>管理者サイト</h1><p>ユーザー、セッション、権限、監査ログを管理します。</p></div>
+      <button type="button" id="refreshAdmin">最新情報に更新</button>
+    </section>
+
+    <section class="admin-stats" id="adminStats" aria-label="利用状況"></section>
+
+    <section class="admin-panel">
+      <div class="admin-panel-heading">
+        <div><p class="eyebrow">USER MANAGEMENT</p><h2>ユーザー管理</h2></div>
+        <form id="adminSearch"><input id="adminSearchInput" type="search" placeholder="ID・メール・会員番号・名前"><button type="submit">検索</button></form>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>ユーザー</th><th>権限</th><th>状態</th><th>登録／最終ログイン</th><th>操作</th></tr></thead>
+          <tbody id="adminUsers"><tr><td colspan="5">読み込み中...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-panel">
+      <div class="admin-panel-heading"><div><p class="eyebrow">AUDIT LOG</p><h2>管理・認証ログ</h2></div></div>
+      <div class="admin-audit-list" id="adminAudit"></div>
+    </section>
+  </main>
+  <div class="toast" id="adminToast" role="status"></div>
+  <script src="admin.js?v=20260620-1"></script>
+</body>
+</html>

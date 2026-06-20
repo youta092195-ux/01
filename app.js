@@ -336,6 +336,7 @@ function validationMessage(detail) {
     const field = fieldNames[error.loc?.at(-1)] || "入力項目";
     const message = String(error.msg || "")
       .replace("String should have at least 3 characters", "3文字以上で入力してください")
+      .replace("String should have at least 12 characters", "12文字以上で入力してください")
       .replace("String should have at least 8 characters", "8文字以上で入力してください")
       .replace("Input should be greater than 20", "20kgを超える値を入力してください")
       .replace("Input should be less than or equal to 400", "400kg以下で入力してください")
@@ -2237,8 +2238,8 @@ document.querySelector("#savePassword").addEventListener("click", async () => {
     showToast("新しいパスワードが一致しません。");
     return;
   }
-  if (!currentPassword || newPassword.length < 8) {
-    showToast("現在のパスワードと8文字以上の新しいパスワードを入力してください。");
+  if (!currentPassword || newPassword.length < 12) {
+    showToast("現在のパスワードと、英大文字・英小文字・数字を含む12文字以上の新しいパスワードを入力してください。");
     return;
   }
   try {

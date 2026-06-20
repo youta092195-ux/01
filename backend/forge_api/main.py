@@ -9,12 +9,17 @@ from uuid import uuid4
 
 from fastapi import Cookie, Depends, FastAPI, File, Form, HTTPException, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from .auth import AuthRepository
 from .config import load_settings
 from .models import (
     AnalysisJobResponse,
+    AdminAuditResponse,
+    AdminStatsResponse,
+    AdminUserResponse,
+    AdminUserRoleUpdate,
+    AdminUserStatusUpdate,
     JobStatus,
     Lift,
     LoginIdUpdate,
@@ -35,7 +40,11 @@ from .service import VideoAnalysisService
 
 settings = load_settings()
 repository = AnalysisRepository(settings.database_path)
-auth_repository = AuthRepository(settings.database_path)
+auth_repository = AuthRepository(
+    settings.database_path,
+    export_user_registry=settings.export_user_registry,
+)
+auth_repository.promote_configured_admins(settings.admin_login_ids)
 service = VideoAnalysisService(repository)
 executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="forge-analysis")
 rate_limit_lock = Lock()
@@ -45,14 +54,63 @@ app = FastAPI(
     title="AI×MUS Training API",
     version="0.2.0",
     description="AI×MUS web and future mobile application API.",
+    docs_url=None if settings.public_base_url.startswith("https://") else "/docs",
+    redoc_url=None if settings.public_base_url.startswith("https://") else "/redoc",
+    openapi_url=None if settings.public_base_url.startswith("https://") else "/openapi.json",
 )
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Accept", "X-Requested-With"],
 )
+
+
+def client_ip(request: Request) -> str:
+    return (
+        request.headers.get("cf-connecting-ip")
+        or request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+        or (request.client.host if request.client else "unknown")
+    )
+
+
+def trusted_origins() -> set[str]:
+    return {
+        origin.rstrip("/")
+        for origin in [settings.public_base_url, *settings.allowed_origins]
+        if origin
+    }
+
+
+@app.middleware("http")
+async def security_middleware(request: Request, call_next):
+    if request.method not in {"GET", "HEAD", "OPTIONS"} and request.url.path.startswith("/api/"):
+        origin = request.headers.get("origin", "").rstrip("/")
+        fetch_site = request.headers.get("sec-fetch-site", "")
+        if fetch_site == "cross-site" or (origin and origin not in trusted_origins()):
+            return JSONResponse(status_code=403, content={"detail": "許可されていないリクエストです。"})
+
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(self), microphone=(), geolocation=()"
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
+    script_policy = "'self' 'unsafe-inline'" if request.url.path == "/creator.html" else "'self'"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        f"script-src {script_policy}; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com; "
+        "img-src 'self' data: blob:; media-src 'self' blob:; "
+        "connect-src 'self'; object-src 'none'; frame-ancestors 'none'; "
+        "base-uri 'self'; form-action 'self'"
+    )
+    if is_https_request(request):
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
 
 
 @app.get("/api/v1/health")
@@ -75,19 +133,13 @@ def is_https_request(request: Request) -> bool:
 
 
 def request_base_url(request: Request) -> str:
-    forwarded_host = request.headers.get("x-forwarded-host")
-    host = forwarded_host or request.headers.get("host")
-    scheme = "https" if is_https_request(request) else request.url.scheme
-    return f"{scheme}://{host}".rstrip("/") if host else settings.public_base_url
+    if settings.public_base_url:
+        return settings.public_base_url
+    return str(request.base_url).rstrip("/")
 
 
 def enforce_rate_limit(request: Request, bucket: str, limit: int) -> None:
-    client_ip = (
-        request.headers.get("cf-connecting-ip")
-        or request.headers.get("x-forwarded-for", "").split(",")[0].strip()
-        or (request.client.host if request.client else "unknown")
-    )
-    key = f"{bucket}:{client_ip}"
+    key = f"{bucket}:{client_ip(request)}"
     now = monotonic()
     with rate_limit_lock:
         events = rate_limit_events[key]
@@ -101,11 +153,16 @@ def enforce_rate_limit(request: Request, bucket: str, limit: int) -> None:
         events.append(now)
 
 
-def set_session_cookie(response: Response, token: str, request: Request) -> None:
+def set_session_cookie(
+    response: Response,
+    token: str,
+    request: Request,
+    days: int,
+) -> None:
     response.set_cookie(
         key="forge_session",
         value=token,
-        max_age=settings.session_days * 24 * 60 * 60,
+        max_age=days * 24 * 60 * 60,
         httponly=True,
         secure=settings.secure_cookies or is_https_request(request),
         samesite="lax",
@@ -124,6 +181,17 @@ def current_user(
     return user
 
 
+def current_admin(
+    forge_session: str | None = Cookie(default=None),
+) -> dict:
+    if not forge_session:
+        raise HTTPException(status_code=404, detail="Not found")
+    user = auth_repository.user_from_session(forge_session)
+    if user is None or user.get("role") != "admin" or not user.get("is_active", True):
+        raise HTTPException(status_code=404, detail="Not found")
+    return user
+
+
 @app.post("/api/v1/auth/register", response_model=UserResponse, status_code=201)
 def register(
     registration: UserRegistration,
@@ -136,7 +204,7 @@ def register(
     except ValueError as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
     token = auth_repository.create_session(user["id"], settings.session_days)
-    set_session_cookie(response, token, request)
+    set_session_cookie(response, token, request, settings.session_days)
     return UserResponse(**user)
 
 
@@ -146,13 +214,104 @@ def login(
     response: Response,
     request: Request,
 ) -> UserResponse:
-    enforce_rate_limit(request, "login", 10)
+    enforce_rate_limit(request, "login", 5)
+    if credentials.login_id.strip().lower() in settings.admin_login_ids:
+        auth_repository.promote_configured_admins(settings.admin_login_ids)
     user = auth_repository.authenticate(credentials.login_id, credentials.password)
     if user is None:
+        auth_repository.write_audit_log(
+            None,
+            "login_failed",
+            ip_address=client_ip(request),
+        )
         raise HTTPException(status_code=401, detail="IDまたはパスワードが正しくありません。")
-    token = auth_repository.create_session(user["id"], settings.session_days)
-    set_session_cookie(response, token, request)
+    session_days = 1 if user.get("role") == "admin" else settings.session_days
+    token = auth_repository.create_session(user["id"], session_days)
+    set_session_cookie(response, token, request, session_days)
+    auth_repository.write_audit_log(
+        user,
+        "login_succeeded",
+        target_user_id=user["id"],
+        ip_address=client_ip(request),
+    )
     return UserResponse(**user)
+
+
+@app.get("/api/v1/admin/stats", response_model=AdminStatsResponse)
+def admin_stats(admin: dict = Depends(current_admin)) -> AdminStatsResponse:
+    return AdminStatsResponse(**auth_repository.admin_stats())
+
+
+@app.get("/api/v1/admin/users", response_model=list[AdminUserResponse])
+def admin_users(
+    query: str = "",
+    admin: dict = Depends(current_admin),
+) -> list[AdminUserResponse]:
+    return [AdminUserResponse(**user) for user in auth_repository.list_users(query)]
+
+
+@app.patch("/api/v1/admin/users/{user_id}/status", response_model=AdminUserResponse)
+def admin_update_user_status(
+    user_id: str,
+    payload: AdminUserStatusUpdate,
+    request: Request,
+    admin: dict = Depends(current_admin),
+) -> AdminUserResponse:
+    if user_id == admin["id"] and not payload.is_active:
+        raise HTTPException(status_code=400, detail="自分自身を停止することはできません。")
+    updated = auth_repository.set_user_active(user_id, payload.is_active)
+    if updated is None:
+        raise HTTPException(status_code=404, detail="ユーザーが見つかりません。")
+    auth_repository.write_audit_log(
+        admin,
+        "user_enabled" if payload.is_active else "user_disabled",
+        target_user_id=user_id,
+        ip_address=client_ip(request),
+    )
+    return AdminUserResponse(**updated)
+
+
+@app.patch("/api/v1/admin/users/{user_id}/role", response_model=AdminUserResponse)
+def admin_update_user_role(
+    user_id: str,
+    payload: AdminUserRoleUpdate,
+    request: Request,
+    admin: dict = Depends(current_admin),
+) -> AdminUserResponse:
+    if user_id == admin["id"] and payload.role != "admin":
+        raise HTTPException(status_code=400, detail="自分自身の管理者権限は解除できません。")
+    updated = auth_repository.set_user_role(user_id, payload.role)
+    if updated is None:
+        raise HTTPException(status_code=404, detail="ユーザーが見つかりません。")
+    auth_repository.write_audit_log(
+        admin,
+        "user_role_changed",
+        target_user_id=user_id,
+        detail=f"role={payload.role}",
+        ip_address=client_ip(request),
+    )
+    return AdminUserResponse(**updated)
+
+
+@app.post("/api/v1/admin/users/{user_id}/revoke-sessions", status_code=204)
+def admin_revoke_sessions(
+    user_id: str,
+    request: Request,
+    admin: dict = Depends(current_admin),
+) -> Response:
+    auth_repository.revoke_user_sessions(user_id)
+    auth_repository.write_audit_log(
+        admin,
+        "sessions_revoked",
+        target_user_id=user_id,
+        ip_address=client_ip(request),
+    )
+    return Response(status_code=204)
+
+
+@app.get("/api/v1/admin/audit", response_model=list[AdminAuditResponse])
+def admin_audit(admin: dict = Depends(current_admin)) -> list[AdminAuditResponse]:
+    return [AdminAuditResponse(**entry) for entry in auth_repository.list_audit_logs()]
 
 
 @app.get("/api/v1/auth/me", response_model=UserResponse)
@@ -351,6 +510,29 @@ def web_app_icon() -> FileResponse:
     return FileResponse(
         frontend_dir / "app-icon.png",
         media_type="image/png",
+        headers=frontend_headers,
+    )
+
+
+@app.get("/admin.html", include_in_schema=False)
+def admin_portal(admin: dict = Depends(current_admin)) -> FileResponse:
+    return FileResponse(frontend_dir / "admin.html", headers=frontend_headers)
+
+
+@app.get("/admin.js", include_in_schema=False)
+def admin_script(admin: dict = Depends(current_admin)) -> FileResponse:
+    return FileResponse(
+        frontend_dir / "admin.js",
+        media_type="application/javascript",
+        headers=frontend_headers,
+    )
+
+
+@app.get("/admin.css", include_in_schema=False)
+def admin_styles(admin: dict = Depends(current_admin)) -> FileResponse:
+    return FileResponse(
+        frontend_dir / "admin.css",
+        media_type="text/css",
         headers=frontend_headers,
     )
 
