@@ -1096,6 +1096,7 @@ function resetLogExerciseRecords() {
 function populateLogFromHistory(record, mode, day) {
   historyFormMode = { mode, sourceDay: String(day), targetDay: mode === "copy" ? "14" : String(day) };
   resetLogExerciseRecords();
+  logForm.elements.duration.value = Number(record.duration || 60);
   record.exercises.forEach((item) => {
     const parsed = parseHistoryExercise(item);
     selectedBodyParts.add(parsed.part);
@@ -1850,7 +1851,7 @@ logForm.addEventListener("submit", (event) => {
       note: historyFormMode.mode === "copy"
         ? `6月${historyFormMode.sourceDay}日の記録からコピーしました。`
         : "履歴画面から編集しました。",
-      duration: Number(sourceRecord.duration || 0),
+      duration: Number(data.get("duration") || sourceRecord.duration || 0),
       volume: calculateRecordVolume(exercises),
       averageRpe: averageRecordRpe(exercises)
     };
@@ -1864,7 +1865,7 @@ logForm.addEventListener("submit", (event) => {
       meta: `${submittedExercises.length}種目・平均RPE ${averageRecordRpe(submittedExercises).toFixed(1).replace(".0", "") || "－"}`,
       exercises: submittedExercises,
       note: data.get("memo") || "今日のトレーニング記録",
-      duration: 0,
+      duration: Number(data.get("duration") || 0),
       volume: calculateRecordVolume(submittedExercises),
       averageRpe: averageRecordRpe(submittedExercises)
     };
