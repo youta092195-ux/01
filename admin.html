@@ -10,6 +10,19 @@
   <link rel="stylesheet" href="admin.css?v=20260620-1">
 </head>
 <body class="admin-body">
+  <section class="admin-login" id="adminLogin">
+    <form id="adminLoginForm">
+      <div class="admin-login-brand"><span class="brand-mark"><img src="app-icon.png" alt=""></span><span>AI×MUS</span></div>
+      <p class="eyebrow">ADMIN AUTHENTICATION</p>
+      <h1>管理者ログイン</h1>
+      <p>管理者IDとパスワードを入力してください。</p>
+      <label>管理者ID<input name="login_id" type="text" autocomplete="username" value="AI123" required></label>
+      <label>パスワード<input name="password" type="password" autocomplete="current-password" required></label>
+      <p class="admin-login-error" id="adminLoginError"></p>
+      <button type="submit">管理者サイトを開く</button>
+      <a href="/">ユーザーログイン画面へ</a>
+    </form>
+  </section>
   <main class="admin-shell">
     <header class="admin-header">
       <a class="brand" href="/"><span class="brand-mark"><img src="app-icon.png" alt=""></span><span>AI×MUS</span></a>
@@ -42,6 +55,6 @@
     </section>
   </main>
   <div class="toast" id="adminToast" role="status"></div>
-  <script src="admin.js?v=20260620-1"></script>
+  <script src="admin.js?v=20260620-2"></script>
 </body>
 </html>

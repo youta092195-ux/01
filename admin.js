@@ -2,6 +2,9 @@ const usersBody = document.querySelector("#adminUsers");
 const stats = document.querySelector("#adminStats");
 const audit = document.querySelector("#adminAudit");
 const toast = document.querySelector("#adminToast");
+const adminLogin = document.querySelector("#adminLogin");
+const adminShell = document.querySelector(".admin-shell");
+const adminLoginForm = document.querySelector("#adminLoginForm");
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (character) => ({
@@ -29,6 +32,33 @@ async function adminRequest(path, options = {}) {
     throw new Error(message);
   }
   return response.status === 204 ? null : response.json();
+}
+
+async function authRequest(path, options = {}) {
+  const response = await fetch(`/api/v1/auth/${path}`, {
+    credentials: "include",
+    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    ...options
+  });
+  if (!response.ok) {
+    let message = "ログインできませんでした。";
+    try {
+      message = (await response.json()).detail || message;
+    } catch {}
+    throw new Error(message);
+  }
+  return response.json();
+}
+
+function showAdminShell() {
+  adminLogin.hidden = true;
+  adminShell.classList.add("ready");
+}
+
+function showAdminLogin(message = "") {
+  adminLogin.hidden = false;
+  adminShell.classList.remove("ready");
+  document.querySelector("#adminLoginError").textContent = message;
 }
 
 function formatDate(value) {
@@ -127,4 +157,38 @@ usersBody.addEventListener("click", async (event) => {
   }
 });
 
-refreshAll();
+adminLoginForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const data = new FormData(adminLoginForm);
+  const submit = adminLoginForm.querySelector("button");
+  submit.disabled = true;
+  document.querySelector("#adminLoginError").textContent = "";
+  try {
+    const user = await authRequest("login", {
+      method: "POST",
+      body: JSON.stringify({
+        login_id: data.get("login_id"),
+        password: data.get("password")
+      })
+    });
+    if (user.role !== "admin") {
+      await fetch("/api/v1/auth/logout", { method: "POST", credentials: "include" });
+      throw new Error("管理者権限のあるアカウントではありません。");
+    }
+    adminLoginForm.reset();
+    showAdminShell();
+    await refreshAll();
+  } catch (error) {
+    showAdminLogin(error.message);
+  } finally {
+    submit.disabled = false;
+  }
+});
+
+authRequest("me")
+  .then((user) => {
+    if (user.role !== "admin") throw new Error();
+    showAdminShell();
+    return refreshAll();
+  })
+  .catch(() => showAdminLogin());

@@ -63,7 +63,7 @@ def load_settings() -> Settings:
         smtp_use_tls=os.getenv("FORGE_SMTP_USE_TLS", "true").lower() == "true",
         admin_login_ids=[
             value.strip().lower()
-            for value in os.getenv("FORGE_ADMIN_LOGIN_IDS", "").split(",")
+            for value in os.getenv("FORGE_ADMIN_LOGIN_IDS", "AI123").split(",")
             if value.strip()
         ],
         export_user_registry=os.getenv("FORGE_EXPORT_USER_REGISTRY", "false").lower() == "true",

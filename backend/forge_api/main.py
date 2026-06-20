@@ -515,12 +515,12 @@ def web_app_icon() -> FileResponse:
 
 
 @app.get("/admin.html", include_in_schema=False)
-def admin_portal(admin: dict = Depends(current_admin)) -> FileResponse:
+def admin_portal() -> FileResponse:
     return FileResponse(frontend_dir / "admin.html", headers=frontend_headers)
 
 
 @app.get("/admin.js", include_in_schema=False)
-def admin_script(admin: dict = Depends(current_admin)) -> FileResponse:
+def admin_script() -> FileResponse:
     return FileResponse(
         frontend_dir / "admin.js",
         media_type="application/javascript",
@@ -529,7 +529,7 @@ def admin_script(admin: dict = Depends(current_admin)) -> FileResponse:
 
 
 @app.get("/admin.css", include_in_schema=False)
-def admin_styles(admin: dict = Depends(current_admin)) -> FileResponse:
+def admin_styles() -> FileResponse:
     return FileResponse(
         frontend_dir / "admin.css",
         media_type="text/css",
