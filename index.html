@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="app-icon.png?v=20260619-1">
   <link rel="apple-touch-icon" href="app-icon.png?v=20260619-1">
-  <link rel="stylesheet" href="styles.css?v=20260619-1">
+  <link rel="stylesheet" href="styles.css?v=20260620-1">
 </head>
 <body class="auth-loading">
   <section class="auth-gate" id="authGate" aria-live="polite">
@@ -201,17 +201,17 @@
             <div class="mini-calendar-week"><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span></div>
             <div class="mini-month-grid">
               <i></i><i></i><i></i><i></i><i></i><i></i><b>1</b>
-              <b class="trained">2</b><b>3</b><b class="trained">4</b><b>5</b><b class="trained">6</b><b>7</b><b>8</b>
-              <b class="trained">9</b><b class="trained">10</b><b>11</b><b class="planned">12</b><b>13</b><b class="today">14</b><b>15</b>
-              <b class="planned">16</b><b>17</b><b class="planned">18</b><b>19</b><b>20</b><b class="planned">21</b><b>22</b>
-              <b>23</b><b class="planned">24</b><b>25</b><b>26</b><b class="planned">27</b><b>28</b><b>29</b>
+              <b>2</b><b>3</b><b>4</b><b>5</b><b>6</b><b>7</b><b>8</b>
+              <b>9</b><b>10</b><b>11</b><b>12</b><b>13</b><b>14</b><b>15</b>
+              <b>16</b><b>17</b><b>18</b><b>19</b><b class="today">20</b><b>21</b><b>22</b>
+              <b>23</b><b>24</b><b>25</b><b>26</b><b>27</b><b>28</b><b>29</b>
               <b>30</b>
             </div>
-            <div class="month-total"><div><strong>9</strong><span>今月の実施日</span></div><div><strong>10.4h</strong><span>合計時間</span></div><div><strong>52.4t</strong><span>総負荷量</span></div></div>
+            <div class="month-total"><div><strong id="homeMonthFrequency">0</strong><span>今月の実施日</span></div><div><strong id="homeMonthHours">0h</strong><span>合計時間</span></div><div><strong id="homeMonthVolume">0t</strong><span>総負荷量</span></div></div>
           </article>
           <article class="home-volume-card">
-            <div><small>WEEKLY LOAD / 5 WEEKS</small><strong>18,420 <span>kg</span></strong><p>先週比 <b>+2.8%</b></p></div>
-            <div class="home-load-bars"><i style="height:54%"></i><i style="height:65%"></i><i style="height:61%"></i><i style="height:78%"></i><i class="active" style="height:88%"></i></div>
+            <div><small>WEEKLY LOAD / 5 WEEKS</small><strong id="homeWeeklyVolume">0 <span>kg</span></strong><p id="homeWeeklyVolumeNote">記録後に自動集計</p></div>
+            <div class="home-load-bars"><i style="height:0"></i><i style="height:0"></i><i style="height:0"></i><i style="height:0"></i><i class="active" id="homeCurrentLoadBar" style="height:0"></i></div>
             <div class="home-load-labels"><span>5週前</span><span>4週前</span><span>3週前</span><span>先週</span><span>今週</span></div>
           </article>
         </section>
@@ -330,16 +330,10 @@
             <div><p class="eyebrow">LATEST RECORD</p><h3>前回のトレーニング記録</h3></div>
             <button class="text-link" data-open-page="calendar">履歴を見る →</button>
           </div>
-          <div class="recent-record-summary">
-            <div class="recent-date"><strong>10</strong><span>JUN</span></div>
-            <div class="recent-session"><strong>Lower A・脚 / 尻</strong><span>68分・5種目・総ボリューム 6,840kg</span></div>
-            <div class="recent-score"><small>平均RPE</small><strong>7.8</strong></div>
+          <div class="recent-record-summary empty" id="latestRecordSummary">
+            <div class="recent-empty-state"><strong>記録がありません</strong><span>最初のトレーニングを記録すると、ここに表示されます。</span></div>
           </div>
-          <div class="recent-exercises">
-            <div><strong>スクワット</strong><span>110kg × 5回 × 4セット</span><b>推定1RM 128.3kg</b></div>
-            <div><strong>ルーマニアンデッドリフト</strong><span>80kg × 8回 × 3セット</span><b>RPE 8</b></div>
-            <div><strong>ブルガリアンスクワット</strong><span>24kg × 10回 × 3セット</span><b>RPE 8.5</b></div>
-          </div>
+          <div class="recent-exercises" id="latestRecordExercises"></div>
         </section>
 
         <section class="home-tools-grid">
@@ -664,28 +658,24 @@
           <div class="month-switcher"><button type="button">←</button><strong>2026年 6月</strong><button type="button">→</button></div>
         </section>
         <section class="calendar-summary">
-          <article><small>今月の頻度</small><strong>9<span>回</span></strong><p>目標 16回</p></article>
-          <article><small>総トレーニング時間</small><strong>10.4<span>時間</span></strong><p>平均 69分 / 回</p></article>
-          <article><small>総ボリューム</small><strong>52,480<span>kg</span></strong><p class="lime-text">先月比 +7.2%</p></article>
+          <article><small>今月の頻度</small><strong id="calendarFrequency">0<span>回</span></strong><p id="calendarFrequencyNote">まだ記録がありません</p></article>
+          <article><small>総トレーニング時間</small><strong id="calendarHours">0<span>時間</span></strong><p id="calendarHoursNote">平均 0分 / 回</p></article>
+          <article><small>総ボリューム</small><strong id="calendarVolume">0<span>kg</span></strong><p id="calendarVolumeNote">記録後に自動集計</p></article>
         </section>
         <section class="calendar-layout">
           <article class="panel calendar-card">
             <div class="calendar-weekdays"><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span></div>
             <div class="calendar-grid" id="trainingCalendar">
               <button class="outside"><b>25</b></button><button class="outside"><b>26</b></button><button class="outside"><b>27</b></button><button class="outside"><b>28</b></button><button class="outside"><b>29</b></button><button class="outside"><b>30</b></button><button><b>1</b></button>
-              <button class="trained" data-calendar-day="2"><b>2</b><span>Upper A</span></button><button><b>3</b></button><button class="trained" data-calendar-day="4"><b>4</b><span>Lower A</span></button><button><b>5</b></button><button class="trained" data-calendar-day="6"><b>6</b><span>Upper B</span></button><button><b>7</b></button><button><b>8</b></button>
-              <button class="trained selected" data-calendar-day="9"><b>9</b><span>Lower B</span></button><button class="trained" data-calendar-day="10"><b>10</b><span>Lower A</span></button><button><b>11</b></button><button class="planned"><b>12</b><span>Upper A</span></button><button><b>13</b></button><button class="planned"><b>14</b><span>Upper B</span></button><button><b>15</b></button>
-              <button class="planned"><b>16</b><span>Lower B</span></button><button><b>17</b></button><button class="planned"><b>18</b><span>Upper A</span></button><button><b>19</b></button><button><b>20</b></button><button class="planned"><b>21</b><span>Lower A</span></button><button><b>22</b></button>
-              <button><b>23</b></button><button class="planned"><b>24</b><span>Upper B</span></button><button><b>25</b></button><button><b>26</b></button><button class="planned"><b>27</b><span>Lower B</span></button><button><b>28</b></button><button><b>29</b></button>
+              <button><b>2</b></button><button><b>3</b></button><button><b>4</b></button><button><b>5</b></button><button><b>6</b></button><button><b>7</b></button><button><b>8</b></button>
+              <button><b>9</b></button><button><b>10</b></button><button><b>11</b></button><button><b>12</b></button><button><b>13</b></button><button><b>14</b></button><button><b>15</b></button>
+              <button><b>16</b></button><button><b>17</b></button><button><b>18</b></button><button><b>19</b></button><button><b>20</b></button><button><b>21</b></button><button><b>22</b></button>
+              <button><b>23</b></button><button><b>24</b></button><button><b>25</b></button><button><b>26</b></button><button><b>27</b></button><button><b>28</b></button><button><b>29</b></button>
               <button><b>30</b></button><button class="outside"><b>1</b></button><button class="outside"><b>2</b></button><button class="outside"><b>3</b></button><button class="outside"><b>4</b></button><button class="outside"><b>5</b></button><button class="outside"><b>6</b></button>
             </div>
           </article>
           <aside class="panel calendar-detail" id="calendarDetail">
-            <p class="eyebrow">JUNE 9</p><h2>Lower B</h2><p class="detail-meta">脚 / 尻・72分・平均RPE 8.1</p>
-            <div class="history-exercise"><strong>スクワット</strong><span>107.5kg × 5 × 4</span><b>RPE 8</b></div>
-            <div class="history-exercise"><strong>ヒップスラスト</strong><span>100kg × 8 × 3</span><b>RPE 8.5</b></div>
-            <div class="history-exercise"><strong>レッグカール</strong><span>35kg × 12 × 3</span><b>RPE 8</b></div>
-            <div class="history-note"><small>メモ</small><p>腰の張りはなし。スクワットの深さも安定。</p></div>
+            <div class="empty-history-detail"><strong>まだトレーニング記録はありません</strong><p>「記録する」から最初のトレーニングを保存しましょう。</p></div>
           </aside>
         </section>
       </div>
@@ -750,6 +740,7 @@
           <aside class="settings-nav">
             <button class="active" data-settings-target="profile">プロフィール</button>
             <button data-settings-target="password">パスワード変更</button>
+            <button data-settings-target="glossary">用語集</button>
             <button data-settings-target="exercises">トレーニング種目</button>
             <button data-settings-target="analysis">AI解析</button>
             <button data-settings-target="menuApply">メニュー反映</button>
@@ -790,6 +781,22 @@
                 <label class="settings-field">新しいパスワード<span class="password-field"><input id="newPassword" type="password" minlength="8" autocomplete="new-password"><button type="button" data-toggle-password>表示</button></span></label>
                 <label class="settings-field">新しいパスワード確認<span class="password-field"><input id="newPasswordConfirm" type="password" minlength="8" autocomplete="new-password"><button type="button" data-toggle-password>表示</button></span></label>
                 <button class="settings-save-button secondary" id="savePassword" type="button">パスワードを変更</button>
+              </div>
+            </article>
+
+            <article class="panel settings-section" data-settings-section="glossary">
+              <div class="settings-heading">
+                <div><p class="eyebrow">TRAINING GLOSSARY</p><h2>トレーニング用語集</h2><p>メニューや記録画面で使う主な用語です。</p></div>
+              </div>
+              <div class="glossary-list">
+                <article><strong>RPE</strong><p>自覚的運動強度。RPE 10は限界、9はあと1回、8はあと2回、7はあと3回ほどできる感覚です。</p></article>
+                <article><strong>1RM / MAX</strong><p>正しいフォームで1回だけ挙げられる最大重量です。BIG3の推奨重量を計算する基準になります。</p></article>
+                <article><strong>推定1RM</strong><p>使用重量と反復回数から計算した1RMの目安です。実測MAXとは差が出る場合があります。</p></article>
+                <article><strong>ボリューム</strong><p>重量 × 回数 × セット数の合計です。トレーニング量を比較する目安になります。</p></article>
+                <article><strong>レスト</strong><p>セット間の休憩時間です。高重量種目ほど長め、軽い補助種目ほど短めが基本です。</p></article>
+                <article><strong>限界回数</strong><p>フォームを保って実施できる最大回数です。「10回が限界の重さで8回」は、あと2回の余力を残す＝RPE 8の目安です。</p></article>
+                <article><strong>ウォームアップ</strong><p>体温と可動性を高め、メイン種目へ安全に移るための準備運動です。</p></article>
+                <article><strong>クールダウン</strong><p>低強度運動やストレッチで心拍を落ち着かせ、使用部位を整える時間です。</p></article>
               </div>
             </article>
 
@@ -991,6 +998,6 @@
   </dialog>
 
   <div class="toast" id="toast" role="status"></div>
-  <script src="app.js?v=20260619-1"></script>
+  <script src="app.js?v=20260620-1"></script>
 </body>
 </html>

@@ -50,6 +50,7 @@ const videoLibrary = {
   squat: [],
   deadlift: []
 };
+const calendarRecords = {};
 
 const analysisSettings = {
   profile: "general",
@@ -202,11 +203,7 @@ function applyAuthenticatedUser(user) {
   } else {
     loadPerformanceData();
   }
-  document.querySelectorAll("#trainingCalendar button").forEach((button) => {
-    button.classList.remove("trained", "planned", "selected");
-    button.querySelector("span")?.remove();
-  });
-  document.querySelector("#calendarDetail").innerHTML = '<div class="empty-history-detail"><strong>まだトレーニング記録はありません</strong><p>ホームの「最初のトレーニングを記録」から始めましょう。</p></div>';
+  loadCalendarRecords();
   userSettings.username = user.username;
   userSettings.notifications = user.notifications;
   analysisSettings.profile = user.purpose;
@@ -1311,8 +1308,55 @@ function getTrainingParameters() {
   return parameters[selectedPurpose];
 }
 
-function exercise(name, weight, reps, rpe, rest) {
-  return { name, weight, reps, rpe, rest };
+function exercise(name, weight, reps, rpe, rest, basis = "") {
+  return { name, weight, reps, rpe: String(rpe), rest, basis };
+}
+
+function repetitionWeightGuide(reps) {
+  const firstRep = Number(String(reps).match(/\d+/)?.[0]) || 10;
+  if (firstRep <= 3) return "5回が限界の重さで3回";
+  if (firstRep <= 5) return "7回が限界の重さで5回";
+  if (firstRep <= 8) return "10回が限界の重さで8回";
+  if (firstRep <= 10) return "12回が限界の重さで10回";
+  return "15回が限界の重さで12回";
+}
+
+function applyWeightEvidence(templates) {
+  const directMaxSources = {
+    "ベンチプレス": "bench",
+    "スクワット": "squat",
+    "デッドリフト": "deadlift",
+    "ショルダープレス": "shoulder"
+  };
+  const derivedMaxSources = {
+    "ルーマニアンデッドリフト": "deadlift",
+    "ナローベンチプレス": "bench"
+  };
+  Object.values(templates).forEach((template) => {
+    template.exercises.forEach((item) => {
+      const sourceKey = directMaxSources[item.name] || derivedMaxSources[item.name];
+      const source = sourceKey ? progressData[sourceKey] : null;
+      const exerciseHistory = Object.values(progressData).find((data) => data.name === item.name && data.max > 0);
+      if (source?.max > 0) {
+        item.basis = directMaxSources[item.name]
+          ? `BIG3 MAX／過去記録 ${source.max.toFixed(1).replace(".0", "")}kgを基準に算出`
+          : `${source.name}のMAX／過去記録を基準に算出`;
+        return;
+      }
+      if (exerciseHistory) {
+        const referenceOneRm = Number(exerciseHistory.oneRm || exerciseHistory.max);
+        item.weight = `${roundToPlate(referenceOneRm * getTrainingParameters().intensity)}kg`;
+        item.basis = `${item.name}の過去記録（推定1RM ${referenceOneRm.toFixed(1).replace(".0", "")}kg）を基準に算出`;
+        return;
+      }
+      if (["自重", "軽負荷", "－"].some((label) => item.weight.startsWith(label))) {
+        item.basis = `RPE ${item.rpe}になる負荷・可動域で調整`;
+        return;
+      }
+      item.weight = repetitionWeightGuide(item.reps);
+      item.basis = `重量記録がないため、限界回数とRPE ${item.rpe}を基準に選択`;
+    });
+  });
 }
 
 function getSessionTemplates() {
@@ -1393,17 +1437,22 @@ function getSessionTemplates() {
   templates.back.exercises = templates.pull.exercises.filter((_, index) => index !== 0).concat([exercise("ワンハンドロウ", "28kg", "8–10", "8", "90秒")]);
   templates.shoulders.exercises = [templates.push.exercises[2], templates.push.exercises[3], exercise("リアレイズ", "7kg", "12–15", "8", "60秒"), exercise("フェイスプル", "20kg", "12–15", "7", "60秒")];
   templates.arms.exercises = [exercise("バーベルカール", "25kg", "8–12", "8", "75秒"), exercise("ナローベンチプレス", `${roundToPlate(bench * 0.8)}kg`, "8–10", "8", "90秒"), exercise("ハンマーカール", "12kg", "10–12", "8", "60秒"), exercise("スカルクラッシャー", "20kg", "10–12", "8", "60秒")];
+  applyWeightEvidence(templates);
   return templates;
 }
 
 function renderExerciseDetails(items) {
   return items.map((item) => `
     <div class="generated-exercise">
-      <strong>${item.name}</strong>
+      <div class="generated-exercise-heading">
+        <strong>${escapeHtml(item.name)}</strong>
+        <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(`${item.name} 正しいフォーム やり方`)}" target="_blank" rel="noreferrer" aria-label="${escapeHtml(item.name)}のフォーム動画をYouTubeで検索">フォーム動画 ↗</a>
+      </div>
       <div><small>重量</small><b>${item.weight}</b></div>
       <div><small>回数</small><b>${item.reps}</b></div>
       <div><small>RPE</small><b>${item.rpe}</b></div>
       <div><small>レスト</small><b>${item.rest}</b></div>
+      <p class="weight-basis">${escapeHtml(item.basis || `RPE ${item.rpe}を基準に調整`)}</p>
     </div>
   `).join("");
 }
@@ -1786,30 +1835,48 @@ logForm.addEventListener("submit", (event) => {
   const weight = Number(data.get("weight")).toFixed(1);
   const painParts = data.getAll("pain");
   const exerciseCount = exerciseRecords.querySelectorAll(".record-card").length;
+  const submittedExercises = collectHistoryExercisesFromForm();
+  let savedDay = String(new Date().getDate());
   if (historyFormMode) {
     const targetDay = historyFormMode.targetDay;
     const sourceRecord = calendarRecords[historyFormMode.sourceDay];
-    const exercises = collectHistoryExercisesFromForm();
+    const exercises = submittedExercises;
     const parts = [...new Set(exercises.map((item) => item[3]))];
+    savedDay = String(targetDay);
     calendarRecords[targetDay] = {
       title: historyFormMode.mode === "copy" ? `${sourceRecord.title} COPY` : sourceRecord.title,
       meta: `${parts.join(" / ")}・${historyFormMode.mode === "copy" ? "本日にコピー" : "編集済み"}`,
       exercises,
       note: historyFormMode.mode === "copy"
         ? `6月${historyFormMode.sourceDay}日の記録からコピーしました。`
-        : "履歴画面から編集しました。"
+        : "履歴画面から編集しました。",
+      duration: Number(sourceRecord.duration || 0),
+      volume: calculateRecordVolume(exercises),
+      averageRpe: averageRecordRpe(exercises)
     };
-    updateCalendarDayButton(targetDay, calendarRecords[targetDay]);
-    renderCalendarDetail(targetDay);
     historyFormMode = null;
     logDialog.querySelector(".history-editing-notice")?.remove();
     logDialog.querySelector(".dialog-header h2").textContent = "今日の記録";
+  } else if (submittedExercises.length) {
+    const parts = [...new Set(submittedExercises.map((item) => item[3]))];
+    calendarRecords[savedDay] = {
+      title: parts.length ? `${parts.join(" / ")}トレーニング` : "トレーニング",
+      meta: `${submittedExercises.length}種目・平均RPE ${averageRecordRpe(submittedExercises).toFixed(1).replace(".0", "") || "－"}`,
+      exercises: submittedExercises,
+      note: data.get("memo") || "今日のトレーニング記録",
+      duration: 0,
+      volume: calculateRecordVolume(submittedExercises),
+      averageRpe: averageRecordRpe(submittedExercises)
+    };
   }
+  saveCalendarRecords();
+  renderTrainingHistoryState();
+  if (calendarRecords[savedDay]) renderCalendarDetail(savedDay);
   document.querySelector("#currentWeight").innerHTML = `${weight}<span>kg</span>`;
   document.querySelector("#progressWeight").innerHTML = `${weight} <em>kg</em>`;
   document.querySelector("#aiCurrentWeight").textContent = `${weight}kg`;
   const updatedExercises = updatePerformanceFromLog();
-  if (currentUser && updatedExercises.length) {
+  if (currentUser && submittedExercises.length) {
     localStorage.setItem(`aimusHasRecords:${currentUser.id}`, "true");
     renderHomeStartState();
   }
@@ -2238,7 +2305,100 @@ document.querySelector("#rmWeightInput").addEventListener("input", updateRmCalcu
 document.querySelector("#rmRepsInput").addEventListener("input", updateRmCalculator);
 updateRmCalculator();
 
-const calendarRecords = {};
+function calendarStorageKey() {
+  return currentUser ? `aimusCalendarRecords:${currentUser.id}` : null;
+}
+
+function calculateRecordVolume(exercises) {
+  return exercises.reduce((total, item) => {
+    const values = [...String(item[1] || "").matchAll(/([\d.]+)/g)].map((match) => Number(match[1]));
+    const [weight = 0, reps = 0, sets = 0] = values;
+    return total + weight * reps * sets;
+  }, 0);
+}
+
+function averageRecordRpe(exercises) {
+  const values = exercises
+    .map((item) => Number(String(item[2] || "").match(/[\d.]+/)?.[0]))
+    .filter(Number.isFinite);
+  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+}
+
+function saveCalendarRecords() {
+  const key = calendarStorageKey();
+  if (key) localStorage.setItem(key, JSON.stringify(calendarRecords));
+}
+
+function loadCalendarRecords() {
+  Object.keys(calendarRecords).forEach((day) => delete calendarRecords[day]);
+  const key = calendarStorageKey();
+  if (key) {
+    try {
+      Object.assign(calendarRecords, JSON.parse(localStorage.getItem(key) || "{}"));
+    } catch {
+      localStorage.removeItem(key);
+    }
+  }
+  renderTrainingHistoryState();
+}
+
+function renderTrainingHistoryState() {
+  document.querySelectorAll("#trainingCalendar button:not(.outside)").forEach((button) => {
+    button.classList.remove("trained", "planned", "selected");
+    button.removeAttribute("data-calendar-day");
+    button.querySelector("span")?.remove();
+  });
+  document.querySelectorAll(".mini-month-grid b").forEach((day) => day.classList.remove("trained"));
+
+  const entries = Object.entries(calendarRecords).sort((a, b) => Number(a[0]) - Number(b[0]));
+  entries.forEach(([day, record]) => {
+    updateCalendarDayButton(day, record);
+    const miniDay = [...document.querySelectorAll(".mini-month-grid b")].find((item) => item.textContent === String(day));
+    miniDay?.classList.add("trained");
+  });
+
+  const frequency = entries.length;
+  const totalMinutes = entries.reduce((sum, [, record]) => sum + Number(record.duration || 0), 0);
+  const totalVolume = entries.reduce((sum, [, record]) => sum + Number(record.volume ?? calculateRecordVolume(record.exercises || [])), 0);
+  const averageMinutes = frequency ? Math.round(totalMinutes / frequency) : 0;
+  document.querySelector("#calendarFrequency").innerHTML = `${frequency}<span>回</span>`;
+  document.querySelector("#calendarFrequencyNote").textContent = frequency ? `今月 ${frequency}回実施` : "まだ記録がありません";
+  document.querySelector("#calendarHours").innerHTML = `${(totalMinutes / 60).toFixed(totalMinutes ? 1 : 0)}<span>時間</span>`;
+  document.querySelector("#calendarHoursNote").textContent = `平均 ${averageMinutes}分 / 回`;
+  document.querySelector("#calendarVolume").innerHTML = `${Math.round(totalVolume).toLocaleString()}<span>kg</span>`;
+  document.querySelector("#calendarVolumeNote").textContent = frequency ? "保存済み記録から集計" : "記録後に自動集計";
+  document.querySelector("#homeMonthFrequency").textContent = frequency;
+  document.querySelector("#homeMonthHours").textContent = `${(totalMinutes / 60).toFixed(totalMinutes ? 1 : 0)}h`;
+  document.querySelector("#homeMonthVolume").textContent = `${(totalVolume / 1000).toFixed(totalVolume ? 1 : 0)}t`;
+  document.querySelector("#homeWeeklyVolume").innerHTML = `${Math.round(totalVolume).toLocaleString()} <span>kg</span>`;
+  document.querySelector("#homeWeeklyVolumeNote").textContent = frequency ? "保存済み記録から集計" : "記録後に自動集計";
+  document.querySelector("#homeCurrentLoadBar").style.height = totalVolume ? "88%" : "0";
+
+  const summary = document.querySelector("#latestRecordSummary");
+  const exerciseList = document.querySelector("#latestRecordExercises");
+  const detail = document.querySelector("#calendarDetail");
+  if (!frequency) {
+    summary.classList.add("empty");
+    summary.innerHTML = '<div class="recent-empty-state"><strong>記録がありません</strong><span>最初のトレーニングを記録すると、ここに表示されます。</span></div>';
+    exerciseList.innerHTML = "";
+    detail.innerHTML = '<div class="empty-history-detail"><strong>まだトレーニング記録はありません</strong><p>「記録する」から最初のトレーニングを保存しましょう。</p></div>';
+    return;
+  }
+
+  const [latestDay, latest] = entries.at(-1);
+  const latestRpe = Number(latest.averageRpe ?? averageRecordRpe(latest.exercises || []));
+  const latestVolume = Number(latest.volume ?? calculateRecordVolume(latest.exercises || []));
+  summary.classList.remove("empty");
+  summary.innerHTML = `
+    <div class="recent-date"><strong>${escapeHtml(latestDay)}</strong><span>JUN</span></div>
+    <div class="recent-session"><strong>${escapeHtml(latest.title)}</strong><span>${latest.exercises.length}種目・総ボリューム ${Math.round(latestVolume).toLocaleString()}kg</span></div>
+    <div class="recent-score"><small>平均RPE</small><strong>${latestRpe ? latestRpe.toFixed(1).replace(".0", "") : "－"}</strong></div>
+  `;
+  exerciseList.innerHTML = latest.exercises.slice(0, 3).map((item) => `
+    <div><strong>${escapeHtml(item[0])}</strong><span>${escapeHtml(item[1])}</span><b>${escapeHtml(item[2])}</b></div>
+  `).join("");
+  renderCalendarDetail(latestDay);
+}
 
 function updateCalendarDayButton(day, record) {
   const button = [...document.querySelectorAll("#trainingCalendar button:not(.outside)")].find(
@@ -2290,7 +2450,7 @@ document.querySelector("#calendarDetail").addEventListener("click", (event) => {
   if (copyButton) populateLogFromHistory(calendarRecords[copyButton.dataset.historyCopy], "copy", copyButton.dataset.historyCopy);
 });
 
-renderCalendarDetail("9");
+renderTrainingHistoryState();
 
 document.querySelector("#openPainLog").addEventListener("click", () => logDialog.showModal());
 

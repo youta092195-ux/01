@@ -481,6 +481,10 @@ button { color: inherit; cursor: pointer; }
 .recent-workout-panel { margin-top: 14px; padding: 22px; }
 .text-link { border: 0; background: transparent; color: var(--lime) !important; font-size: 8px; }
 .recent-record-summary { margin-top: 17px; padding: 14px 0; display: grid; grid-template-columns: 50px 1fr auto; align-items: center; gap: 14px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.recent-record-summary.empty { grid-template-columns: 1fr; }
+.recent-empty-state { min-height: 78px; display: grid; place-content: center; gap: 6px; text-align: center; }
+.recent-empty-state strong { font-size: 14px; }
+.recent-empty-state span { color: var(--muted); font-size: 9px; }
 .recent-date { width: 45px; height: 45px; display: grid; place-content: center; border-radius: 8px; background: #252a22; text-align: center; }
 .recent-date strong { font-size: 16px; line-height: 1; }
 .recent-date span { margin-top: 3px; color: var(--muted); font-size: 7px; }
@@ -736,13 +740,17 @@ button { color: inherit; cursor: pointer; }
 .phase-title span { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 5px; background: rgba(200,244,91,.1); color: var(--lime); font-size: 8px; }
 .phase-title strong { font-size: 9px; }
 .phase-title small { margin-left: auto; color: var(--muted); font-size: 7px; }
-.generated-exercise { min-height: 42px; display: grid; grid-template-columns: 1.7fr repeat(4, .65fr); align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid #292d26; background: #11130f; }
+.generated-exercise { min-height: 42px; display: grid; grid-template-columns: 1.7fr repeat(4, .65fr); align-items: center; gap: 8px; padding: 10px; border-bottom: 1px solid #292d26; background: #11130f; }
 .generated-exercise:first-of-type { border-radius: 7px 7px 0 0; }
 .generated-exercise:last-child { border-bottom: 0; border-radius: 0 0 7px 7px; }
-.generated-exercise > strong { font-size: 9px; }
+.generated-exercise-heading { display: grid; gap: 5px; }
+.generated-exercise-heading strong { font-size: 9px; }
+.generated-exercise-heading a { width: fit-content; color: var(--lime); font-size: 7px; text-decoration: none; }
+.generated-exercise-heading a:hover { text-decoration: underline; }
 .generated-exercise div { display: grid; gap: 2px; }
 .generated-exercise small { color: var(--muted); font-size: 6px; }
 .generated-exercise b { font-size: 9px; font-weight: 600; }
+.generated-exercise .weight-basis { grid-column: 1 / -1; margin: 0; padding-top: 6px; border-top: 1px dashed #30352d; color: #aeb6a7; font-size: 8px; line-height: 1.5; }
 
 .weight-growth-panel { margin-bottom: 14px; padding: 22px; }
 .weight-summary { display: flex; align-items: baseline; gap: 8px; }
@@ -1019,6 +1027,10 @@ button { color: inherit; cursor: pointer; }
 .settings-heading p:last-child { margin: 6px 0 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
 .settings-field { margin: 18px 0; display: grid; gap: 8px; color: #cdd2c8; font-size: 12px; }
 .settings-field input { height: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: 7px; outline: 0; background: #11130f; color: var(--text); }
+.glossary-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+.glossary-list article { padding: 16px; border: 1px solid var(--line); border-radius: 8px; background: #11130f; }
+.glossary-list strong { color: var(--lime); font-size: 13px; }
+.glossary-list p { margin: 7px 0 0; color: var(--muted); font-size: 10px; line-height: 1.7; }
 .profile-settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .big3-settings-heading { margin-top: 24px; }
 .big3-settings-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
@@ -1354,7 +1366,7 @@ body { font-size: 15px; line-height: 1.55; }
 .wizard-back, .wizard-next, .generate-plan-button { font-size: 12px; }
 .generated-day-header small, .generated-day-header > span,
 .phase-title small { font-size: 10px; }
-.phase-title strong, .generated-exercise > strong,
+.phase-title strong, .generated-exercise-heading strong,
 .generated-exercise b { font-size: 12px; }
 .generated-exercise small { font-size: 9px; }
 
@@ -1452,7 +1464,8 @@ dialog label span, .optional, .log-section-heading small { font-size: 11px; }
   .profile-reference { grid-template-columns: repeat(2, 1fr); }
   .profile-reference > span { grid-column: 1 / -1; }
   .generated-exercise { grid-template-columns: 1.4fr repeat(2, .7fr); }
-  .generated-exercise div:nth-of-type(3), .generated-exercise div:nth-of-type(4) { display: none; }
+  .generated-exercise > div:nth-of-type(4), .generated-exercise > div:nth-of-type(5) { display: none; }
+  .glossary-list { grid-template-columns: 1fr; }
   .calendar-summary, .recent-exercises, .coach-tips { grid-template-columns: 1fr; }
   .recovery-summary-grid, .recovery-page-grid { grid-template-columns: 1fr; }
   .calendar-grid button { min-height: 62px; padding: 5px; }
