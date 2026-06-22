@@ -17,8 +17,6 @@ services:
         value: "false"
       - key: FORGE_ADMIN_LOGIN_IDS
         value: "AI123"
-      - key: FORGE_BOOTSTRAP_ADMIN_PASSWORD_HASH
-        value: "scrypt$16384$8$1$8e7eaca1f6d947147ac5591807a6e9be$7b6965d9dff18e9ce10013ec614d150bfb98fd8d00863571fe29d53411975a6c"
       - key: FORGE_MAX_UPLOAD_MB
         value: "300"
       - key: FORGE_PUBLIC_BASE_URL
