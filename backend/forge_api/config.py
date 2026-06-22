@@ -22,6 +22,7 @@ class Settings:
     smtp_from: str | None
     smtp_use_tls: bool
     admin_login_ids: list[str]
+    bootstrap_admin_password_hash: str | None
     export_user_registry: bool
 
     @property
@@ -66,6 +67,7 @@ def load_settings() -> Settings:
             for value in os.getenv("FORGE_ADMIN_LOGIN_IDS", "AI123").split(",")
             if value.strip()
         ],
+        bootstrap_admin_password_hash=os.getenv("FORGE_BOOTSTRAP_ADMIN_PASSWORD_HASH") or None,
         export_user_registry=os.getenv("FORGE_EXPORT_USER_REGISTRY", "false").lower() == "true",
     )
     settings.upload_dir.mkdir(parents=True, exist_ok=True)

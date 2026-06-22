@@ -44,6 +44,11 @@ auth_repository = AuthRepository(
     settings.database_path,
     export_user_registry=settings.export_user_registry,
 )
+if settings.bootstrap_admin_password_hash:
+    auth_repository.ensure_bootstrap_admin(
+        "AI123",
+        settings.bootstrap_admin_password_hash,
+    )
 auth_repository.promote_configured_admins(settings.admin_login_ids)
 service = VideoAnalysisService(repository)
 executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="forge-analysis")
@@ -83,12 +88,21 @@ def trusted_origins() -> set[str]:
     }
 
 
+def effective_request_origin(request: Request) -> str:
+    forwarded_proto = request.headers.get("x-forwarded-proto", "").split(",")[0].strip()
+    forwarded_host = request.headers.get("x-forwarded-host", "").split(",")[0].strip()
+    scheme = forwarded_proto or request.url.scheme
+    host = forwarded_host or request.headers.get("host", "")
+    return f"{scheme}://{host}".rstrip("/")
+
+
 @app.middleware("http")
 async def security_middleware(request: Request, call_next):
     if request.method not in {"GET", "HEAD", "OPTIONS"} and request.url.path.startswith("/api/"):
         origin = request.headers.get("origin", "").rstrip("/")
         fetch_site = request.headers.get("sec-fetch-site", "")
-        if fetch_site == "cross-site" or (origin and origin not in trusted_origins()):
+        allowed_origins = trusted_origins() | {effective_request_origin(request)}
+        if fetch_site == "cross-site" or (origin and origin not in allowed_origins):
             return JSONResponse(status_code=403, content={"detail": "許可されていないリクエストです。"})
 
     response = await call_next(request)

@@ -389,6 +389,69 @@ class AuthRepository:
                 (utc_now(), *login_ids),
             )
 
+    def ensure_bootstrap_admin(
+        self,
+        login_id: str,
+        password_hash: str,
+        email: str = "admin@aimus.local",
+        username: str = "AI×MUS 管理者",
+    ) -> dict[str, Any]:
+        if not password_hash.startswith("scrypt$"):
+            raise ValueError("Bootstrap administrator password hash is invalid.")
+        normalized_login_id = login_id.strip()
+        with self._lock, self._connect() as connection:
+            row = connection.execute(
+                "SELECT * FROM users WHERE login_id = ? COLLATE NOCASE",
+                (normalized_login_id,),
+            ).fetchone()
+            if row is None:
+                now = utc_now()
+                user_id = str(uuid4())
+                next_number = connection.execute(
+                    "SELECT COUNT(*) + 1 FROM users"
+                ).fetchone()[0]
+                connection.execute(
+                    """
+                    INSERT INTO users (
+                        id, member_number, login_id, email, password_hash,
+                        username, birth_date, weight_kg, purpose,
+                        notifications, role, is_active, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'admin', 1, ?, ?)
+                    """,
+                    (
+                        user_id,
+                        f"AIMUS-{next_number:08d}",
+                        normalized_login_id,
+                        email,
+                        password_hash,
+                        username,
+                        "1990-01-01",
+                        70.0,
+                        "general",
+                        0,
+                        now,
+                        now,
+                    ),
+                )
+            else:
+                connection.execute(
+                    """
+                    UPDATE users
+                    SET role = 'admin', is_active = 1, password_hash = ?, updated_at = ?
+                    WHERE id = ?
+                    """,
+                    (password_hash, utc_now(), row["id"]),
+                )
+        return self.get_user_by_login_id(normalized_login_id)
+
+    def get_user_by_login_id(self, login_id: str) -> dict[str, Any] | None:
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT * FROM users WHERE login_id = ? COLLATE NOCASE",
+                (login_id.strip(),),
+            ).fetchone()
+        return self._public_user(row) if row else None
+
     def list_users(self, query: str = "", limit: int = 200) -> list[dict[str, Any]]:
         query = query.strip()
         parameters: list[Any] = []

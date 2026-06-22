@@ -3,7 +3,7 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 from datetime import date
 
-from forge_api.auth import AuthRepository
+from forge_api.auth import AuthRepository, _hash_password
 from forge_api.models import TrainingProfile, UserRegistration
 
 
@@ -124,3 +124,22 @@ class AuthRepositoryTest(TestCase):
         logs = self.repository.list_audit_logs()
         self.assertEqual(logs[0]["action"], "user_enabled")
         self.assertEqual(self.repository.admin_stats()["admins"], 1)
+
+    def test_bootstrap_admin_is_created_and_password_is_repaired(self) -> None:
+        password_hash = _hash_password("BootstrapAdmin123!")
+        created = self.repository.ensure_bootstrap_admin("AI123", password_hash)
+        self.assertEqual(created["role"], "admin")
+        self.assertTrue(created["is_active"])
+        self.assertIsNotNone(
+            self.repository.authenticate("AI123", "BootstrapAdmin123!")
+        )
+
+        replacement_hash = _hash_password("ReplacementAdmin123!")
+        repaired = self.repository.ensure_bootstrap_admin("AI123", replacement_hash)
+        self.assertEqual(repaired["id"], created["id"])
+        self.assertIsNone(
+            self.repository.authenticate("AI123", "BootstrapAdmin123!")
+        )
+        self.assertIsNotNone(
+            self.repository.authenticate("AI123", "ReplacementAdmin123!")
+        )
